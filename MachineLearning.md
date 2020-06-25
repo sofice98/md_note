@@ -133,7 +133,7 @@ cross_val_score(model, X, y, cv=5)
 
 + **精确度**：$Accuracy=\cfrac{TP+TN}{TT+FN+FP+TN}$ 表示分类正确的样本数占样本总数的比例，非平衡数据集会发生准确度悖论从而导致**失真**
 
-+ **平衡查准率与查全率**：$F_\beta=(1+\beta^2)\cfrac{P·R}{\beta^2·P+R}$ 当$\beta$靠近0时，$F_\beta$偏向查准率P，当$\beta$靠近正无穷时，$F_\beta$偏向查全率R
++ **平衡查准率与查全率**：$F_\beta=(1+\beta^2)\cfrac{P·R}{\beta^2·P+R}$ 当$\beta$靠近0时，$F_\beta$偏向查准率P，当$\beta$靠近正无穷时，$F_\beta$偏向查全率R，$\beta=1$时为$F1-score$
 
 + **ROC空间**（Receiver Operating Characteristic）：真阳性率 $TPR=\cfrac{TP}{TP+FN}$，伪阳性率 $FPR=\cfrac{FP}{FP+TN}$，以FPR伪横轴，以TPR为纵轴画图，得到的是ROC空间，其中：
 
@@ -643,6 +643,30 @@ dtProb = dtModel.predict_proba(testData[features])[:, 1]
 
   <img src="\MachineLearning\rfe2.png" alt="image-20200623111941192" style="zoom:67%;" />
 
+  ```python
+  from sklearn.ensemble import RandomTreesEmbedding
+  from sklearn.naive_bayes import BernoulliNB
+  from sklearn.pipeline import Pipeline
+  
+  pipe = Pipeline([("embedding", RandomTreesEmbedding(random_state=1024)),
+          ("model", BernoulliNB())])
+  pipe.fit(data[["x1", "x2"]], data["y"])
+  prob = pipe.predict_proba(np.c_[X1.ravel(), X2.ravel()])[:, 0]
+  # 将模型的预测结果可视化
+  # 生成100*100的预测点集
+  x1 = np.linspace(min(data["x1"]) - 0.2, max(data["x1"]) + 0.2, 100)
+  x2 = np.linspace(min(data["x2"]) - 0.2, max(data["x2"]) + 0.2, 100)
+  X1, X2 = np.meshgrid(x1, x2)
+  # 预测点的类别
+  prob = pipe.predict_proba(np.c_[X1.ravel(), X2.ravel()])[:, 0]
+  prob = prob.reshape(X1.shape)
+  # 画轮廓线
+  ax.contourf(X1, X2, prob, levels=[0.5, 1], colors=["gray"], alpha=0.4)
+  plt.show()
+  ```
+
+  
+
 + 提升方法（boosting methods）
 
   **梯度提升决策树（gradient-boosted trees，GBTs）**
@@ -667,19 +691,198 @@ dtProb = dtModel.predict_proba(testData[features])[:, 1]
 
 
 
-简化版预测公式：$\hat{y}=argmax_yP(X|y)P(y)$
+利用贝叶斯框架，简化版预测公式：$\hat{y}=argmax_yP(X|y)P(y)$
 
 
 
 ### 朴素贝叶斯
 
-NB assumption：假设各特征相互独立
+**naive Bayes assumption**：假设各特征相互独立：$P(x_1,x_2,...,x_n|y)=\prod_{i=1}^nP(x_i|y)$ ，越独立效果越好
 
 包含：伯努利模型，多项式模型，高斯模型
 
-+ 伯努利模型
-+ 多项式模型
-+ 
+> NLP特征提取字典法：将出现的文字组成一个字典X，出现的记为1，X为非常稀疏的向量
+
++ **伯努利模型**
+
+  $P(x_i=1|y)=p_{i,y};P(x_i=0|y)=1-p_{i,y}$ 
+
+  多元伯努利模型的变量y的分布概率$\hat{\theta_l}$等于各类别在训练数据中的占比，每个字的条件概率$\hat{p_{j,l}}$等于这个字在这个类别里出现的比例
+
+  训练集没有出现过的字没办法预测，这时可加入**平滑项**，将$\hat{p_{j,l}}$的计算公式分母上加$2\alpha$，分子上加$\alpha$（平滑系数） 
+
++ **多项式模型**
+
+  更改特征提取方法，X的长度与文本字数相同，第i个元素表示第i个位置上出现的文字的字典序号
+
+  变量y的分布概率$\hat{\theta_l}$等于各类别在训练数据中的占比，每个字的条件概率$\hat{p_{j,l}}$等于这个字的出现次数占这个类别的总字数的比例
+
++ **TD-IDF**
+
+  文字对文本的影响主要有：
+
+  - TF：某个文字在文本中出现的比例越高，与主题越相关
+
+  - IDF：如果某个文字在几乎所有文本中都出现，说明它是常用字
+
+  $TF_{i,k}=x_{i,k}/\sum_kx_{i,k}$，$IDF_k=ln(m/\sum_i1_{\{x_{i,k}>0\}})$，$TFIDF_{i,k}=TF_{i,k}IDF_{k}$
+
+  常对文本向量进行TF-IDF 变换后在使用多项式模型
+
+```python
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.metrics import classification_report
+from sklearn.naive_bayes import BernoulliNB, MultinomialNB
+from sklearn.preprocessing import LabelEncoder
+from sklearn.pipeline import Pipeline
+
+def trainBernoulliNB(data):
+    """
+    使用伯努利模型对数据建模
+    """
+    # 生成量化文本向量
+    vect = CountVectorizer(token_pattern=r"(?u)\b\w+\b", binary=True)
+    X = vect.fit_transform(data["content"])
+    # 生成量化标签字典
+    le = LabelEncoder()
+    Y = le.fit_transform(data["label"])
+    model = BernoulliNB()
+    model.fit(X, Y)
+    return vect, le, model
+
+def trainMultinomialNB(data):
+    """
+    使用多项式模型对数据进行建模
+    """
+    pipe = Pipeline([("vect", CountVectorizer(token_pattern=r"(?u)\b\w+\b")),
+        ("model", MultinomialNB())])
+    le = LabelEncoder()
+    Y = le.fit_transform(data["label"])
+    pipe.fit(data["content"], Y)
+    return le, pipe
+
+def trainMultinomialNBWithTFIDF(data):
+    """
+    使用TFIDF+多项式模型对数据建模
+    """
+    pipe = Pipeline([("vect", CountVectorizer(token_pattern=r"(?u)\b\w+\b")),
+        ("tfidf", TfidfTransformer(norm=None, sublinear_tf=True)),
+        ("model", MultinomialNB())])
+    le = LabelEncoder()
+    Y = le.fit_transform(data["label"])
+    pipe.fit(data["content"], Y)
+    return le, pipe
+
+def trainModel(trainData, testData, testDocs, docs):
+    """
+    对分词后的文本数据分别使用多项式和伯努利模型进行分类
+    """
+    # 伯努利模型
+    vect, le, model = trainBernoulliNB(trainData)
+    pred = le.classes_[model.predict(vect.transform(testDocs))]
+    # 传入准确值和预测值，生成分析报告
+    print(classification_report(
+        le.transform(testData["label"]),
+        model.predict(vect.transform(testData["content"])),
+        target_names=le.classes_))
+    # 多项式模型
+    le, pipe = trainMultinomialNB(trainData)
+    pred = le.classes_[pipe.predict(testDocs)]
+    print(classification_report(
+        le.transform(testData["label"]),
+        pipe.predict(testData["content"]),
+        target_names=le.classes_))
+    # TFIDF+多项式模型
+    le, pipe = trainMultinomialNBWithTFIDF(trainData)
+    pred = le.classes_[pipe.predict(testDocs)]
+    print(classification_report(
+        le.transform(testData["label"]),
+        pipe.predict(testData["content"]),
+        target_names=le.classes_))
+```
+
+
+
+### 判别分析
+
+discriminant analysis，与朴素贝叶斯相比，允许变量间存在关系
+
++ **线性判别分析（LinearDiscriminantAnalysis，LDA）**
+
+  只能处理连续型变量，$X|y=0\sim N(\mu_0,\Sigma)$，$X|y=1\sim N(\mu_1,\Sigma)$，$P(y=0)=\theta_0$，$P(y=1)=\theta_1$
+
+  模型要求：
+
+  1. 变量服从正态分布，因此要连续；
+  2. 对于不同类别，自变量协方差一样，只是期望不一样，只关心各类别中心位置；
+  3. 协方差$\Sigma$是对角矩阵时，变量相互独立
+
+  参数估计：
+
+  1. $\theta_l$：等于各类别在训练数据中的占比
+  2. $\mu_l$：等于训练数据里各类别的平均值
+  3. $\Sigma$：等于各类别内部协方差的加权平均，权重为类别内数据的个数
+  
+  LDA的预测公式与逻辑回归的一样，在满足模型要求时，往往生成式模型效果更好
+  
+  LDA可以用作降维，$\mu_l$与降维理论中$\mu_l$一样，$\Sigma$与降维理论中$\cfrac{1}{m}s_W$一样
+  
+  ```python
+  from sklearn import datasets
+  from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+  # 生成数字集
+  digits = datasets.load_digits()
+  X = digits.data
+  y = digits.target
+  #输入降维后的维度进行降维
+  model = LinearDiscriminantAnalysis(n_components=3)
+  model.fit(X, y)
+  newX = model.transform(X)
+  ```
+  
++ **二次判别分析（QuadraticDiscriminantAnalysis，LDA）**
+
+  不要求自变量分布的协方差矩阵一样，但无降维功能，当协方差矩阵为对角矩阵时，二次判别变成高斯模型
+
+  调用GaussianNB或QuadraticDiscriminantAnalysis建模
+
+### 隐马尔科夫模型
+
+当数据之间不再独立，数据间的顺序会对数据本身造成影响，此时称为序列数据，需要用隐马尔科夫模型（Hidden Markov Model，HMM）来解决
+
+**马尔科夫链**
+
+描述的是一个随机过程，随机变量是相互关联的：$P(y_i|y_{i-1},y_{i-2},...,y_0)=P(y_i|y_{i-1})$，并且$P(y_0,...,y_{i-1},y_{i+1},...,y_n|y_i)=P(y_0,...,y_{i-1}|y_i)P(y_{i+1},...,y_n|y_i)$，即在已知当前状态的条件下，未来和过去相互独立
+
+当$y_i$取值离散且链平稳时，马尔科夫链可由**转移矩阵**和**初始分布**表示，转移矩阵Q为n*n方阵，$Q_{p,q}=P(y_i=q|y_{i-1}=p)$，并且也包括先验概率（常用朴素贝叶斯），数据的**联合概率**为$P(X,y)=P(y_0)P(y_1|y_0)...P(y_i|y_{i-1})\prod_jP(X_j|y_j)$
+
+**应用**
+
++ 监督式学习（中文分词）
+
+  multinomial HMM，包含Viterbi算法求解模型预测结果
+
+  将文字分为若干种状态，再去根据y估计模型参数
+
++ 非监督式学习（股票市场）
+
+  要用到最大期望算法（EM）来估计模型参数和预测量：先随机生成模型参数，通过E step求得预测值y，再通过M step求得估算的模型参数，重复交叉使用即可得到所有参数
+
+  假设股票的日收益率和成交量服从正态分布，此时隐马尔科夫模型称为Gaussian HMM
+
+  ```python
+  from matplotlib.finance import candlestick_ochl
+  from hmmlearn.hmm import GaussianHMM
+  
+  cols = ["r_5", "r_20", "a_5", "a_20"]
+  # 参数为内在状态个数，先验分布的协方差矩阵类型，迭代次数
+  model = GaussianHMM(n_components=3, covariance_type="full", n_iter=1000,
+                      random_state=2010)
+  model.fit(data[cols])
+  hiddenStatus = model.predict(data[cols])
+  ```
+
+  
 
 
 
@@ -689,40 +892,33 @@ NB assumption：假设各特征相互独立
 
 ## 聚类
 
+
+
 ## 降维
 
+理论：
+
+在二维平面上，要求把点投影到一条直线上，直线的方向向量为$\vec{k}$，|k|=1，则点X1投影点到原点的距离为$kX_1^T$，假设只有两个类别0、1，
+
+**类别中心**：$u_l=\cfrac{1}{N_l}\sum_{i=1}^m1_{\{yi=l\}}kX_1^T$，$N_l$为类别数据个数
+
+**内部方差**：$v_l=\sum_{i=1}^m1_{\{yi=l\}}(kX_1^T-u_l)^2$
+
+降维后，希望各类别中心越远越好，各类别方差越小越好，即
+
+**最大化类别距离**：$max_k(u_0-u_1)^2/(v_0+v_1)$
+
+记**原始数据的类别中心**：$\mu_l=\cfrac{1}{N_l}\sum_{i=1}^m1_{\{yi=l\}}X_i$，则$u_l=k\mu_l^T$
+
+**内部方差矩阵**：$s_l=\sum_{i=1}^m1_{\{yi=l\}}(X_i-\mu_l)^T(X_i-\mu_l)$，则$v_l=ks_lk^T$
+
+记：$s_W=(s_0+s_1)$，$s_B=(\mu_0-\mu_1)^T(\mu_0-\mu_1)$
+
+则最大化类别距离：$max_kks_Bk^T/ks_Wk^T$，得$k^*=s_W^{-1}(\mu_0-\mu_1)$
 
 
 
-
-
-
-
-
-## Scikit-Learn
-
-​		
-
-```python
-# 高斯贝叶斯分类（有监督分类)
-iris = sns.load_dataset('iris') 
-
-sns.pairplot(iris, hue='species', size=1.5)
-
-X_iris = iris.drop('species', axis=1)
-y_iris = iris['species']
-Xtrain, Xtest, ytrain, ytest = train_test_split(X_iris, y_iris, random_state=1)
-
-model = GaussianNB() # 2.初始化模型
-model.fit(Xtrain, ytrain) # 3.用模型拟合数据
-y_model = model.predict(Xtest) # 4.对新数据进行预测
-
-print(accuracy_score(ytest, y_model))
-```
-
-
-
-## 特征工程
+# 特征工程
 
 找到与问题有关的任何信息，把它们转换成特征矩阵的数值
 
@@ -756,61 +952,7 @@ vec.get_feature_names()
 
 
 
-## 朴素贝叶斯分类
 
-需要确定一个 具有某些特征的样本属于某类标签的概率，通常记为 P (L | 特征 )
-
-![](/DataScience/贝叶斯公式1.png)
-
-假如需要确定两种标签，定义为L1 和 L2，一种方法就是计算这两个标签的后验概率的 比值：
-
-![](/DataScience/贝叶斯公式2.png)
-
-```python
-from sklearn.naive_bayes import GaussianNB        
-model = GaussianNB()      
-model.fit(X, y)
-
-Xnew = [-6, -14] + [14, 18] * rng.rand(2000, 2)        
-ynew = model.predict(Xnew)
-# 计算样本属于某个标签的概率
-yprob = model.predict_proba(Xnew)
-```
-
-> 多项式朴素贝叶斯
->
-> 假设特征是由一个简单多项式分布生成的，多项分布可以描述各种类型样本出现次数的概率，因此多项式朴素贝叶斯非常适合用于描述出现次数或者出现次数比例的特征
-
-```python
-# 新闻文本分类
-from sklearn.datasets import fetch_20newsgroups
-from sklearn.feature_extraction.text import TfidfVectorizer 
-from sklearn.naive_bayes import MultinomialNB 
-from sklearn.pipeline import make_pipeline
-from sklearn.metrics import confusion_matrix 
-
-categories = ['talk.religion.misc', 'soc.religion.christian', 'sci.space', 
- 'comp.graphics'] 
-train = fetch_20newsgroups(subset='train', categories=categories) 
-test = fetch_20newsgroups(subset='test', categories=categories)
-
-model = make_pipeline(TfidfVectorizer(), MultinomialNB())
-model.fit(train.data, train.target) 
-labels = model.predict(test.data)
-    
-mat = confusion_matrix(test.target, labels) 
-sns.heatmap(mat.T, square=True, annot=True, fmt='d', cbar=False, 
- xticklabels=train.target_names, yticklabels=train.target_names) 
-plt.xlabel('true label') 
-plt.ylabel('predicted label')
-```
-
-优点：
-
-+ 训练和预测的速度非常快
-+ 直接使用概率预测
-+ 通常很容易解释
-+ 可调参数（如果有的话）非常少
 
 
 
