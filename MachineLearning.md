@@ -2,6 +2,10 @@
 
 # Machine Learning
 
+**方法=模型+策略+算法**
+
+模型的假设空间内包含可能的函数和参数，要通过策略计算损失函数和风险函数，写出最优的算法。损失函数的期望为风险函数，目的是期望最小，但不能直接计算，由经验风险估计。经验风险最小化（ERM）认为经验风险最小的模型最优，但易过拟合，因此利用结构风险最小化（SRM），加上正则化或惩罚项，即可**使经验风险与模型复杂度同时小**
+
 **模式识别**：用计算的方法根据样本的特征将样本划分到一定的类别中去
 
 借助数学模型理解数据
@@ -158,13 +162,65 @@ cross_val_score(model, X, y, cv=5)
   ax.plot(fpr, tpr, s, label="%s:%s; %s=%0.2f" % ("模型", i,"曲线下面积（AUC）", _auc))
   ```
   
-  
+
+
+
+**泛化能力**
+
+该方法学习到的模型对未知数据的预测能力
+
+泛化误差（generalization error）等于模型对未知数据预测的误差期望，使用**泛化误差上界**来判断学习算法的优劣
+
+# 数学
+
++ **梯度下降法**
+
+  每次将估计值向梯度的负方向进行修改，可加上步长（学习率），当每次只是用一个误分类的样本进行更新时，称为**随机梯度下降法**，更新过后以前的误分类点可能会正确分类
+
++ **牛顿法**
+
+  使用海森矩阵和泰勒展开公式，近似的用点的函数值表示实际函数值，由此推导出递推公式，当使用另一个矩阵近似海森矩阵以简化计算量时，称为**拟牛顿法**
+
++ **拉格朗日对偶性**
+
+  将原最优化问题，求广义拉格朗日函数的极小极大值，转化为求极大极小值问题的（对偶问题），两个问题在一定条件下等价，需要满足KKT条件
+
+
+
+
 
 
 
 # 有监督学习
 
+## 感知机
 
+**原始形式**
+
+给定训练集$X,y\in\{-1,1\}$，感知机$sign(w·x+b)$学习的损失函数为$L(w,b)=-\sum_{x_i\in m}y_i(w·x_i+b)$
+
+感知机算法是误分类驱动的，采用随机梯度下降法，每次选取一个误分类点对w,b进行更新：$w:=w+\eta y_ix_i，b:=b+\eta y_i$，$\eta\in(0,1]$称为学习率（步长），误分条件为：$y_i(w·x_i+b)\leqslant0$
+
+**对偶形式**
+
+令$\alpha_i=n_i\eta$，则误分条件为：$y_i(\sum_{j=1}^Na_jy_jx_j·x_i+b)\leqslant0$，更新：$\alpha_i:=\alpha_i+\eta，b:=b+\eta y_i$，结果求得$w=\sum_{i=1}^N\alpha_iy_ix_i$。在求误分条件时所用内积可以先求出来存在矩阵中（**Gram矩阵**）：$G=[x_i·x_j]_{N\times N}$
+
+可以证明感知机的原始和对偶形式都是收敛的
+
+```python
+from sklearn.linear_model import Perceptron
+# 参数：正则化项penalty=None/l1/l2 正则化系数alpha 学习率eta0 最大迭代次数max_iter=5 终止阈值tol=None
+perceptron = Perceptron()
+perceptron.fit(X,y)
+# 模型参数w，b和迭代次数
+w = perceptron.coef_ 
+b = perceptron.intercept_
+it = perceptron.n_iter_
+# 预测准确率
+perceptron.score(X,y)
+```
+
+**当特征维度大时用对偶形式，当样本多时用原始形式**
 
 ## 线性回归
 
@@ -431,6 +487,7 @@ probit回归：$P(y_i=1)=1-F_{\epsilon}(-\Chi_i\gamma)$  由此计算顾客购�
 **LOSS函数**：$LL=-\sum_i[y_iln\hat{y_i}+(1-y_i)ln(1-\hat{y_i})]$ 
 
 ```python
+from sklearn.linear_model import LogisticRegression
 data = pd.read_csv(path)
 cols = ["age", "education_num", "capital_gain", "capital_loss", "hours_per_week", "label"]
 data = data[cols]
@@ -890,7 +947,9 @@ discriminant analysis，与朴素贝叶斯相比，允许变量间存在关系
 
 # 无监督学习
 
-## 聚类
+
+
+## k-means
 
 
 
