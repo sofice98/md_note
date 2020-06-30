@@ -63,7 +63,7 @@
 
 **模型持久化**
 
-![image-20200604224059670](\MachineLearning\模型持久化.png)
+![image-20200604224059670](.\MachineLearning\模型持久化.png)
 
 python-python：内置库pickle
 
@@ -125,11 +125,11 @@ cross_val_score(model, X, y, cv=5)
 
 + 过拟合：模型灵活性高，方差高，模型在验证集的表现远远不如在训练集的表现
 
-<img src="\MachineLearning\验证曲线示意图.png" style="zoom: 80%;" />
+<img src=".\MachineLearning\验证曲线示意图.png" style="zoom: 80%;" />
 
 **评估模型结果**
 
-![image-20200611141531731](\MachineLearning\数据预测分类.png)
+![image-20200611141531731](.\MachineLearning\数据预测分类.png)
 
 + **查准率**：$Precision=\cfrac{TP}{TP+FP}$ 表示预测为正的样例中有多少是真正的正样例
 
@@ -147,7 +147,7 @@ cross_val_score(model, X, y, cv=5)
   - 设置不同阈值参数可得到一个点，连起来就是ROC曲线。曲线下方阴影面积为AUC，代表模型预测正确的概率，不依赖于阈值，取决于模型本身
   - 当测试集中的正负样本的分布变换的时候，ROC曲线能够保持不变
 
-  ![image-20200611150737627](\MachineLearning\ROC.png)
+  ![image-20200611150737627](.\MachineLearning\ROC.png)
   
   ```python
   from sklearn.metrics import roc_curve, auc
@@ -181,9 +181,62 @@ cross_val_score(model, X, y, cv=5)
 
   使用海森矩阵和泰勒展开公式，近似的用点的函数值表示实际函数值，由此推导出递推公式，当使用另一个矩阵近似海森矩阵以简化计算量时，称为**拟牛顿法**
 
-+ **拉格朗日对偶性**
++ **拉格朗日乘子法**
 
-  将原最优化问题，求广义拉格朗日函数的极小极大值，转化为求极大极小值问题的（对偶问题），两个问题在一定条件下等价，需要满足KKT条件
+  考虑函数f(x)在约束g(x)下求极值的问题，有如下结论：
+
+  - 对于约束曲面上的任一点$x$，该点的梯度$\nabla g(x)$正交与约束曲面
+  - 在最优点$x^*$，目标函数在该点的梯度$\nabla f(x^*)$正交与约束曲面
+
+  因此有$\nabla f(x^*)+\lambda\nabla g(x^*)=0,\lambda\not=0$，此式即为拉格朗日函数对x求偏导得到
+
+  最优化问题，广义拉格朗日函数，KKT条件如下：
+  $$
+  min_xf(x)\\
+  s.t.\quad h_i(x)=0，g_j(x)\leqslant0\\
+  L(x,\lambda,\mu)=f(x)+\sum_{i=1}^m\lambda_ih_i(x)+\sum_{j=1}^n\mu_jg_j(x)\\
+  KKT:\begin{cases} 
+  \nabla_x L(x,\lambda,\mu)=0\\
+  h_i(x)=0\\
+  g_j(x))\leqslant0\\
+  \mu_j \geqslant 0\\
+  \mu_jg_j(x)=0\\
+  \end{cases}
+  $$
+  
++ **拉格朗日对偶性**
+$$
+  定义\quad \theta_P(x)=max_{\lambda,\mu;\,\mu_i\geqslant0}\,L(x,\lambda,\mu)\\
+  则\quad \theta_P(x)=\begin{cases} 
+  f(x),\quad x满足原始问题约束\\
+  +\infty,\quad 其他
+  \end{cases}\\
+  原始最优化问题等价于极小极大问题\quad p^*=min_x\theta_P(x)=min_x\,\,max_{\lambda,\mu;\,\mu_i\geqslant0}\,L(x,\lambda,\mu)\\
+  定义下确界\quad \theta_D(\lambda,\mu)=min_x\,L(x,\lambda,\mu)=inf_x\,L(x,\lambda,\mu)\\
+  则有对偶问题（极大极小问题）\quad d^*=max_{\lambda,\mu;\,\mu_i\geqslant0}\theta_D(\lambda,\mu)=max_{\lambda,\mu;\,\mu_i\geqslant0}\,\,min_xL(x,\lambda,\mu)\\可证明\quad d^* \leqslant p^*
+$$
+  将原最优化问题，转化为求广义拉格朗日函数的极小极大问题，再转化为极大极小问题的对偶问题，两个问题在一定条件下等价，需要满足KKT条件
+
++ **贝叶斯估计**
+
+  与**极大似然估计（MLE）**不同，贝叶斯估计认为参数是不确定的值，具有一定的概率分布，需要求出给定样本集情况下，参数的最大概率取值，同样也是取对数求偏导解似然方程组，需要知道参数的先验分布。当样本数足够大时，两种的参数估计值相同，当样本小且参数先验分布较准确时，贝叶斯估计较准确
+  
++ **凸优化问题**
+
+  具有形式：
+  $$
+  min_{w}f(w)\\
+  s.t. g_i(w)\leqslant0 i=1,2,...,k\\
+  h_i(w)=0, i=1,2,...,k
+  $$
+  其中，f(w)和g(x)是连续可微凸函数，h(w)是仿射函数
+  
+  当f(w)是二次函数且g(w)是仿射函数时，上述问题成为**凸二次规划问题**
+  
++ **核方法**
+
+  优化问题中，当正则化项$\Omega(||h||_H)$单调递增，损失函数非负时，优化问题的最优解总可以表示成核函数的线性组合：$h^*(x)=\sum_{i=1}^m\alpha_iK(x,x_i)$
+
 
 
 
@@ -193,7 +246,7 @@ cross_val_score(model, X, y, cv=5)
 
 # 有监督学习
 
-## 感知机
+## 感知机(Perceptron)
 
 **原始形式**
 
@@ -222,7 +275,7 @@ perceptron.score(X,y)
 
 **当特征维度大时用对偶形式，当样本多时用原始形式**
 
-## 线性回归
+## 线性回归(Linear Regression)
 
 简洁，高效，容易理解
 
@@ -374,7 +427,7 @@ res = model.fit_regularized(alpha=alpha)
 
 下图为$\alpha$改变时三个参数的变化规律
 
-![image-20200604222642765](\MachineLearning\惩罚项.png)
+![image-20200604222642765](.\MachineLearning\惩罚项.png)
 
 + 前向逐步回归：贪心，开始所有权重设为1，每一步对某个权重增加或减少一个值，迭代若干次即可收敛得到超参数
 
@@ -456,7 +509,7 @@ $w^{(i)} = \exp \left( - \dfrac{\left(\mathbf{x}^{(i)} - \mathbf{x}\right)^2}{2k
 
 
 
-## 逻辑回归
+## 逻辑回归(Logistic Regression)
 
 认为观察得到的结果是经过一层变换后的结果，由正效用$y_i^*$和负效用$y_i^-$确定（称为隐含变量），
 
@@ -468,7 +521,7 @@ probit回归：$P(y_i=1)=1-F_{\epsilon}(-\Chi_i\gamma)$  由此计算顾客购�
 
 
 
-<img src="\MachineLearning\逻辑函数近似.png" alt="image-20200611103957090" style="zoom:80%;" />
+<img src=".\MachineLearning\逻辑函数近似.png" alt="image-20200611103957090" style="zoom:80%;" />
 
 ------
 
@@ -564,53 +617,86 @@ model.fit(X, Y.ravel())
 
 
 
-## 支持向量机
+## 支持向量机(SVM)
 
-**数学原理**
+如图，空间中的直线可以用一个线性方程来表示：$w·x+b=0$ ，w为法向量，法向量指向一侧为正类
 
-如图，空间中的直线可以用一个线性方程来表示：$\beta·(T-\beta)=0$ ，因此，可设$f(X)=\beta·X$，则$f(X)=0$表示一条直线，且$|f(X)|$与点$X$到直线$f(X)=0$的距离成正比，$f(X)$的符号表示点$X$到直线的垂线方向
+**函数间隔**：$样本点\hat{\gamma_i}=y_i(w·x+b)，超平面\hat{\gamma}=min\hat{\gamma_i}$，表示分类的正确性
 
-<img src="\MachineLearning\svm向量基础.png" alt="image-20200615204603657" style="zoom: 50%;" />
+**几何间隔**：$\gamma = \hat{\gamma}/||w||$，表示点与超平面距离
 
-应用到svm中：
+![image-20200629225442920](.\MachineLearning\svm向量基础.png)
 
-<img src="\MachineLearning\svm原理1.png" alt="image-20200615210914591" style="zoom: 67%;" />
+**硬间隔最大化**
 
-设分割线为$\beta·X+b=0$，可得到上下两条虚线和类别分类条件，转化为数学语言并化简：
+原始问题为：
+$$
+max_{w,b}\hat{\gamma}/||w||\\
+s.t. y_i(w·x_i+b)\geqslant\hat{\gamma}
+$$
 
-<img src="\MachineLearning\svm原理2.png" alt="image-20200615211105746" style="zoom: 67%;" />
+函数间隔取值不影响最优化问题的解，取$\hat{\gamma}=1$，并对损失函数作等价替换：
+$$
+min_{w,b}\frac12||w||^2\\
+s.t.\quad y_i(w·x_i+b)-1\geqslant0
+$$
+此时演变成一个**凸二次规划问题**，分类决策函数为$f(x)=sign(w^*·x+b^*)$
 
-<img src="\MachineLearning\svm原理3.png" alt="image-20200615211802211" style="zoom:67%;" />
+![image-20200629232128776](.\MachineLearning\svm原理1.png)
 
-对于**线性不可分问题**，需要加入损失函数：$y_i(w·X_i+c)\geqslant1-\xi_i,\quad\xi\geqslant0$，其中$\xi_i$与点 i 离相应虚线的距离成正比，表示数据 i 这一点违反自身分类原则的程度，所有点的$\xi_i$和越小越好，因此加入**超参数C**，合并损失函数：
 
-<img src="\MachineLearning\svm损失项.png" alt="image-20200615213257591" style="zoom:67%;" />
 
-将不等式变形并改为等式，赋值给$\xi_i$一个值令其满足两个不等式限制条件，再带入损失函数中，得到：
+**软间隔最大化**
 
-<img src="\MachineLearning\svm损失函数.png" alt="image-20200615215527836" style="zoom:67%;" />
+对于**线性不可分问题**，需要加入**松弛参数$\xi$**和**惩罚参数$C$**，其中$\xi_i$与点 i 离相应虚线的距离成正比，表示数据 i 这一点违反自身分类原则的程度，所有点的$\xi_i$和越小越好，合并损失函数：
+$$
+min_{w,b,\xi}\,\, \frac12||w||^2+C\sum_{i=1}^N\xi_i\\
+s.t. \quad y_i(w·x_i+b)\geqslant1-\xi_i,\quad \xi_i\geqslant0
+$$
+将上述原始问题转化为对偶问题：
+$$
+max_{\alpha}\,\, -\frac12 \sum_{i=1}^N\sum_{j=1}^N\alpha_i\alpha_jy_iy_j(x_i·x_j)+\sum_{i=1}^N\alpha_i\\
+s.t.\quad \sum_{i=1}^N\alpha_iy_i=0, \quad 0\leqslant\alpha_i\leqslant C
+$$
+事实上是寻找与被测数据相似的训练数据，并将相应的因变量加权平均得到最后的预测值。只有在虚线上或虚线内的点权重才不为0，其他点权重都为0：
 
-损失函数的前一部分为**L2惩罚项**，后一部分为**预测损失LL（hinge loss）**
+<img src=".\MachineLearning\svm支持向量.png" alt="image-20200622181820083" style="zoom:50%;" />
+
+引入合页损失函数（取正值）后，可将上述原始最优化问题等价为：
+$$
+min_{w,b,\xi}\quad \lambda||w||^2+\sum_{i=1}^N[1-y_i(w·x_i+b)]_+
+$$
+损失函数的前一部分为**L2惩罚项**，后一部分为**预测损失LL（hinge loss）**，代替0/1损失函数
 
 其中超参数C是模型预测损失的权重，C越大表示模型越严格，margin越小，考虑的点越少，称为**hard margin**，C越小考虑的点越多，称为**soft margin**
 
-<img src="\MachineLearning\svm超参数.png" alt="image-20200615221059133" style="zoom:67%;" />
-
-将上边的有限制条件的原始SVM问题转化为更一般的、适于非线性的对偶问题：
-
-<img src="\MachineLearning\svm对偶.png" alt="image-20200622180901407" style="zoom:67%;" />
-
-事实上是寻找与被测数据相似的训练数据，并将相应的因变量加权平均得到最后的预测值。只有在虚线上或虚线内的点权重才不为0，其他点权重都为0：
-
-<img src="\MachineLearning\svm支持向量.png" alt="image-20200622181820083" style="zoom:50%;" />
+<img src=".\MachineLearning\svm超参数.png" alt="image-20200615221059133" style="zoom:60%;" />
 
 **核函数**
 
 $K(x_i,x_j)=\phi(x_i)·\phi(x_j)$ ，其中$\phi(x)$为空间变换
 
-利用核函数，可以极大减少模型运算量，并且完成未知的空间变换，实际应用中，可以用网格搜寻的办法找到最合适的核函数
+利用核函数，可以极大减少模型运算量，隐式地在特征空间进行学习，不需要显式定义特征空间和映射函数，并且完成未知的空间变换，将对偶问题中的向量点乘变为核函数即可：
+$$
+max_{\alpha}\,\, -\frac12 \sum_{i=1}^N\sum_{j=1}^N\alpha_i\alpha_jy_iy_jK(x_i,x_j)+\sum_{i=1}^N\alpha_i\\
+s.t.\quad \sum_{i=1}^N\alpha_iy_i=0, \quad 0\leqslant\alpha_i\leqslant C\\
+f(x)=sign(\sum_{i=1}^N\alpha_i^*y_iK(x_i,x)+b^*)
+$$
+这等价于经过映射函数将输入空间变换到一个新的特征空间中，上述表达式也是广义支持向量机的形式
 
-<img src="\MachineLearning\常用核函数.png" alt="image-20200622182951633" style="zoom:67%;" />
+当核函数对应的Gram矩阵是半正定矩阵时，核函数为正定核，可以使用
+
+实际应用中，可以用网格搜寻的办法找到最合适的核函数
+
+<img src="..\MachineLearning\常用核函数.png" alt="image-20200622182951633" style="zoom:67%;" />
+
+**序列最小最优化算法（SMO）**
+
+一种启发式动态规划算法，用于高效求解上述凸二次规划问题。包括求解两个变量二次规划的解析方法和选择变量的启发式方法
+
+子问题一次选择两个变量，根据$\sum_{i=1}^N\alpha_iy_i=0$，其中只有一个自由变量，如果所有变量都满足KKT条件，则可输出
+
+
 
 **Scale variant**
 
@@ -618,14 +704,23 @@ $K(x_i,x_j)=\phi(x_i)·\phi(x_j)$ ，其中$\phi(x)$为空间变换
 
 
 
+**支持向量回归（SVR）**
+
+使用SVM模型，容忍f(x)与y之间最多有$\epsilon$的偏差
+
+![image-20200630193740226](.\MachineLearning\svr.png)
+
 ```python 
 from sklearn.svm import SVC
-from sklearn.metrics.pairwise import linear_kernel, laplacian_kernel
-from sklearn.metrics.pairwise import polynomial_kernel, rbf_kernel
+from sklearn.metrics.pairwise import linear_kernel, laplacian_kernel, polynomial_kernel, rbf_kernel
 
 model = SVC(kernel=linear_kernel, coef0=1)
 model.fit(data[["x1", "x2"]], data["y"])
 ```
+
+
+
+
 
 
 
@@ -645,7 +740,7 @@ model.fit(data[["x1", "x2"]], data["y"])
 
 **不纯度**：$H_m$，越接近0，表示数据类别越单一，有以下几个常用指标
 
-<img src="\MachineLearning\不纯度指标.png" alt="image-20200622194324629" style="zoom:50%;" />
+<img src=".\MachineLearning\不纯度指标.png" alt="image-20200622194324629" style="zoom:50%;" />
 
 带有split的为相应指标的不纯度计算
 
@@ -688,17 +783,17 @@ dtProb = dtModel.predict_proba(testData[features])[:, 1]
 
   随机来源及scikit-learn函数如下：
 
-  <img src="\MachineLearning\随机森林.png" alt="image-20200623110624949" style="zoom: 67%;" />
+  <img src=".\MachineLearning\随机森林.png" alt="image-20200623110624949" style="zoom: 67%;" />
 
   **随机森林高维映射（random forest embedding）**
 
   可以将随机森林当作非监督式学习使用，随机抽取特征组合成合成数据，与原始数据一起进行决策树训练。当分类结果误差较小时，说明各变量间的相关关系比较强烈
 
-  <img src="\MachineLearning\rfe.png" alt="image-20200623111544046" style="zoom:50%;" />
+  <img src=".\MachineLearning\rfe.png" alt="image-20200623111544046" style="zoom:50%;" />
 
   使用随机森林将低维数据映射到高维后，可以与其他模型联结：
 
-  <img src="\MachineLearning\rfe2.png" alt="image-20200623111941192" style="zoom:67%;" />
+  <img src=".\MachineLearning\rfe2.png" alt="image-20200623111941192" style="zoom:67%;" />
 
   ```python
   from sklearn.ensemble import RandomTreesEmbedding
@@ -730,13 +825,13 @@ dtProb = dtModel.predict_proba(testData[features])[:, 1]
 
   使用梯度提升法，得到更好的预测结果
 
-  <img src="\MachineLearning\梯度提升.png" alt="image-20200623115608709" style="zoom: 50%;" />
+  <img src=".\MachineLearning\梯度提升.png" alt="image-20200623115608709" style="zoom: 50%;" />
 
-  <img src="\MachineLearning\梯度下降提升.png" alt="image-20200623115819454" style="zoom: 60%;" />
+  <img src=".\MachineLearning\梯度下降提升.png" alt="image-20200623115819454" style="zoom: 60%;" />
 
   GBTs的算法步骤如下：
 
-  <img src="\MachineLearning\gbts细节.png" alt="image-20200623120120936" style="zoom:60%;" />
+  <img src=".\MachineLearning\gbts细节.png" alt="image-20200623120120936" style="zoom:60%;" />
 
   GBTs损失函数里没有惩罚项，容易过拟合，可使用XGBoost算法或者与其他模型联结来解决
 
@@ -744,7 +839,7 @@ dtProb = dtModel.predict_proba(testData[features])[:, 1]
 
 关心数据$\{X,y\}$是如何生成的，X代表事物的表象，y代表事物的内在
 
-<img src="\MachineLearning\贝叶斯定理.png" style="zoom:60%;" />
+<img src=".\MachineLearning\贝叶斯定理.png" style="zoom:60%;" />
 
 
 
