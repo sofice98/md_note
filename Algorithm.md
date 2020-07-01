@@ -47,11 +47,36 @@ void generate_subset(int n) {
 
 
 
+**将全排列映射到整数：**
+
+```c++
+int vis[362880], fact[9];       //状态访问数组和阶乘表
+void init_lookup_table() {
+    fact[0] = 1;
+    for (int i = 1; i < 9; i++)    fact[i] = fact[i - 1] * i;
+}
+
+int try_to_insert(int s) {
+    int code = 0;//把st[s]映射到整数code
+    for (int i = 0; i < 9; i++) {
+        int cnt = 0;
+        for (int j = i + 1; j < 9; j++)  if (st[s][j] < st[s][i])   cnt++;
+        code += fact[8 - i] * cnt;
+    }
+    if (vis[code])   return 0;
+    return vis[code] = 1;
+}
+```
 
 
 
 
 
+# 技巧
+
++ 使用数组来变换方向
++ 编码解码映射哈希可提高速度
++ 提前求出素数表，阶乘表可加快速度
 
 
 
