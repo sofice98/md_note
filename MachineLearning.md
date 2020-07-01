@@ -206,7 +206,7 @@ cross_val_score(model, X, y, cv=5)
   
 + **拉格朗日对偶性**
 $$
-  定义\quad \theta_P(x)=max_{\lambda,\mu;\,\mu_i\geqslant0}\,L(x,\lambda,\mu)\\
+定义\quad \theta_P(x)=max_{\lambda,\mu;\,\mu_i\geqslant0}\,L(x,\lambda,\mu)\\
   则\quad \theta_P(x)=\begin{cases} 
   f(x),\quad x满足原始问题约束\\
   +\infty,\quad 其他
@@ -215,7 +215,8 @@ $$
   定义下确界\quad \theta_D(\lambda,\mu)=min_x\,L(x,\lambda,\mu)=inf_x\,L(x,\lambda,\mu)\\
   则有对偶问题（极大极小问题）\quad d^*=max_{\lambda,\mu;\,\mu_i\geqslant0}\theta_D(\lambda,\mu)=max_{\lambda,\mu;\,\mu_i\geqslant0}\,\,min_xL(x,\lambda,\mu)\\可证明\quad d^* \leqslant p^*
 $$
-  将原最优化问题，转化为求广义拉格朗日函数的极小极大问题，再转化为极大极小问题的对偶问题，两个问题在一定条件下等价，需要满足KKT条件
+
+​       将原最优化问题，转化为求广义拉格朗日函数的极小极大问题，再转化为极大极小问题的对偶问题，两个问题在一定条件下等价，需要满足KKT条件
 
 + **贝叶斯估计**
 
@@ -236,6 +237,39 @@ $$
 + **核方法**
 
   优化问题中，当正则化项$\Omega(||h||_H)$单调递增，损失函数非负时，优化问题的最优解总可以表示成核函数的线性组合：$h^*(x)=\sum_{i=1}^m\alpha_iK(x,x_i)$
+  
++ **信息论**
+
+  - **信息量**  $I(x_0)=-lnP(x_0)$ 表示获取信息的多少，事件发生概率越大，获取到的信息量越少
+
+  - **熵**  $H(X)=\sum_iP(x_i)I(x_i)$ 表示信息量的期望
+
+  - **相对熵（KL散度）**  $D_{KL}(P||Q)=\sum_iP(x_i)ln\cfrac{P(x_i)}{Q(x_i)}=-H(P(x))+H(P,Q)$ 表示如果用P来描述目标问题，而不是用Q来描述目标问题，得到的信息增量。在机器学习中，P往往用来表示样本的真实分布，Q用来表示模型所预测的分布，相对熵的值越小，表示P分布和Q分布越接近。可使用$D_{KL}(y||\hat{y})$评估label和predicts之间的差距
+
+  - **交叉熵** $H(P,Q)=-\sum_iP(x_i)lnQ(x_i)$ ，KL散度中前一部分P的熵不变，一般使用交叉熵作为loss函数
+
++ **监督式降维**
+
+  在二维平面上，要求把点投影到一条直线上，直线的方向向量为$w$，则点X投影点到原点的距离为$w^TX$，假设只有两个类别0、1，降维后，希望同类别投影点近（协方差小），不同类别投影点远（中心距离大），即：
+  $$
+  记第i类:集合X_i\quad均值向量\mu_i\quad协方差矩阵\Sigma_i\quad中心投影距离w^T\mu_i\quad投影点协方差w^T\Sigma_iw\\
+  最大化目标：J=\cfrac{||w^T\mu_0-w^T\mu_1||_2^2}{w^T\Sigma_0w+w^T\Sigma_1w}=
+  \cfrac{w^T(\mu_0-\mu_1)(\mu_0-\mu_1)^Tw}{w^T(\Sigma_0+\Sigma_1)w}\\
+  定义\quad类间散度矩阵：S_b=(\mu_0-\mu_1)(\mu_0-\mu_1)\quad 类内散度矩阵：S_w=\Sigma_0+\Sigma_1\\
+  则：J=\cfrac{w^TS_bw}{w^TS_ww}\\
+  解得：w^*=s_W^{-1}(\mu_0-\mu_1)
+  $$
+  
+
+  
+
+  
+
+  
+
+  
+
+  
 
 
 
@@ -244,7 +278,8 @@ $$
 
 
 
-# 有监督学习
+
+# 监督式学习
 
 ## 感知机(Perceptron)
 
@@ -275,6 +310,8 @@ perceptron.score(X,y)
 
 **当特征维度大时用对偶形式，当样本多时用原始形式**
 
+
+
 ## 线性回归(Linear Regression)
 
 简洁，高效，容易理解
@@ -285,23 +322,29 @@ perceptron.score(X,y)
 
 **数学推导**
 
-给定一组数据其中包括特征矩阵 ![[公式]](https://www.zhihu.com/equation?tex=X) , 目标变量向量 ![[公式]](https://www.zhihu.com/equation?tex=y) :
+给定一组数据，找出一种关系来预测标签：
+$$
+X=\begin{bmatrix}
+x_{11}&x_{12}&...&x_{1d}&1\\
+x_{21}&x_{22}&...&x_{2d}&1\\ 
+...&...&...&...&1\\
+x_{m1}&x_{m2}&...&x_{md}&1\\
+\end{bmatrix}\\
+y=(y_1,y_2,...,y_m)^T\\
+广义参数\quad\hat{w}=(w_1,...,w_n;b)^T\\
+y=X\hat{w}^T
+$$
+这里采用平方误差求最优$\hat{w}$： $f(\hat{w})=\sum_{i=1}^m(y_i-x_i^T\hat{w})^2$
 
-![[公式]](https://www.zhihu.com/equation?tex=y+%3D+%5Cleft%5B+%5Cbegin%7Bmatrix%7D+y_1+%5C%5C+y_2+%5C%5C+%3A+%5C%5C+y_m+%5Cend%7Bmatrix%7D+%5Cright%5D) 
+对于上述式子$f(\hat{w})$可以通过梯度下降等方法得到最优解。但是使用矩阵表示将会使求解和程序更为简单：$f(\hat{w})=(y-X\hat{w})^T(y-X\hat{w})$
 
-![[公式]](https://www.zhihu.com/equation?tex=X+%3D+%5Cleft%5B+%5Cbegin%7Bmatrix%7D+1+%26+x_%7B11%7D+%26+x_%7B12%7D+%26+%E2%80%A6+%26+x_%7B1n%7D+%5C%5C+1+%26+x_%7B21%7D+%26+x_%7B22%7D+%26+%E2%80%A6+%26+x_%7B2n%7D+%5C%5C+%3A+%26+%3A+%26+%3A+%26+%E2%80%A6+%26+%3A+%26+%5C%5C+1+%26+x_%7Bn1%7D+%26+x_%7Bn2%7D+%26+%E2%80%A6+%26+x_%7Bnn%7D+%5C%5C+%5Cend%7Bmatrix%7D+%5Cright%5D) 
+将$f(\hat{w})$对$\hat{w}$求导可得：$\cfrac{\partial f(\hat{w})}{\partial \hat{w}}=2X^T(X\hat{w}-y)$
 
-其中 ![[公式]](https://www.zhihu.com/equation?tex=X) 第一列为截距项，我们做线性回归是为了得到一个最优回归系数向量 ![[公式]](https://www.zhihu.com/equation?tex=w) 使得当我们给定一个 ![[公式]](https://www.zhihu.com/equation?tex=x) 能够通过 ![[公式]](https://www.zhihu.com/equation?tex=y%3Dxw) 预测 ![[公式]](https://www.zhihu.com/equation?tex=y) 的值。其中 ![[公式]](https://www.zhihu.com/equation?tex=w+%3D+%5Cleft%5B+%5Cbegin%7Bmatrix%7D+w_0%5C%5C+w_1+%5C%5C+w_2+%5C%5C+%3A+%5C%5C+w_n+%5Cend%7Bmatrix%7D+%5Cright%5D)
+当$X^TX$为满秩矩阵或正定矩阵时，使上式等于0，便可得到：$\hat{w}=(X^TX)^{-1}X^Ty$
 
-这里采用平方误差求最优![[公式]](https://www.zhihu.com/equation?tex=w) ：![[公式]](https://www.zhihu.com/equation?tex=f%28w%29+%3D+%5Csum_%7Bi%3D1%7D%5E%7Bm%7D+%28y_i+-+x_%7Bi%7D%5E%7BT%7Dw%29%5E2) 
+实际中，$X^TX$往往不是满秩矩阵，此时可引入正则化项
 
-对于上述式子 ![[公式]](https://www.zhihu.com/equation?tex=f%28w%29) 可以通过梯度下降等方法得到最优解。但是使用矩阵表示将会使求解和程序更为简单：![[公式]](https://www.zhihu.com/equation?tex=f%28w%29+%3D+%28y+-+Xw%29%5E%7BT%7D%28y+-+Xw%29) 
-
-将 ![[公式]](https://www.zhihu.com/equation?tex=f%28w%29+) 对 ![[公式]](https://www.zhihu.com/equation?tex=w) 求导可得：![[公式]](https://www.zhihu.com/equation?tex=%5Cfrac%7B%5Cpartial+f%28w%29%7D%7B%5Cpartial+w%7D+%3D+-2X%5E%7BT%7D%28y+-+Xw%29) 
-
-使其等于0，便可得到：![[公式]](https://www.zhihu.com/equation?tex=%5Chat%7Bw%7D+%3D+%28X%5E%7BT%7DX%29%5E%7B-1%7DX%5E%7BT%7Dy) 
-
-​	
+模型可推广至**广义线性模型**：$y=g^{-1}(w^Tx+b)$
 
 
 
@@ -415,7 +458,6 @@ plt.plot(xfit, yfit);
 超参数存在时，采用网格搜寻（设置几组针对超参数的控制变量组，来找最小均方差的超参数）和验证集（将数据分为训练集，验证集，测试集）
 
 ```python
-# scikit
 reg = linear_model.Ridge(alpha=.5)
 reg.fit([[0, 0], [0, 0], [1, 1]], [0, .1, 1])
 reg = linear_model.Lasso(alpha=0.1)
@@ -509,38 +551,31 @@ $w^{(i)} = \exp \left( - \dfrac{\left(\mathbf{x}^{(i)} - \mathbf{x}\right)^2}{2k
 
 
 
-## 逻辑回归(Logistic Regression)
+## 对数几率回归(Logistic Regression)
 
-认为观察得到的结果是经过一层变换后的结果，由正效用$y_i^*$和负效用$y_i^-$确定（称为隐含变量），
+无需事先假设数据分布，可以得到近似概率预测，有利于需要利用概率辅助决策的任务
 
-probit回归：$P(y_i=1)=1-F_{\epsilon}(-\Chi_i\gamma)$  由此计算顾客购买的比例，但正态分布的分布函数无法表示，需要近似
+考虑用广义线性模型：$y=g^{-1}(w^Tx+b)$解决分类问题，此时联系函数为单位阶跃函数，用对数几率函数替代：$y=\cfrac{1}{1+e^{-(w^Tx+b)}}$，也即：$ln\cfrac{y}{1-y}=w^Tx+b$，将y视为后验概率估计，则可重写为$ln\cfrac{P(y=1|x)}{P(y=0|x)}=w^Tx+b$，其中$\cfrac{P}{1-P}$为**事件发生比**（odds）
 
-可以用sigmoid函数（逻辑分布的分布函数）近似正态分布，它表示某一方竞争胜出的概率
+模型认为观察得到的结果由正效用$P(y=1|x)$和负效用$P(y=0|x)$确定（称为隐含变量）
 
-近似后的模型为：*逻辑回归模型*  $P(y_i=1)=\cfrac{1}{1+e^{-\Chi_i\beta}}$  ， $ln\cfrac{P(y_i=1)}{1-P(y_i=1)}=\Chi_i\beta$  ，也就是假设**事件发生比**（odds，$\cfrac{P}{1-P}$）的对数为线性模型，事实是将非线性模型转化为线性模型
+显然有**对数几率回归模型**：$P(y=1|x)=\cfrac{ e^{(w^Tx+b)}}{1+e^{(w^Tx+b)}}=\pi(x)，P(y=0|x)=\cfrac{1}{1+e^{(w^Tx+b)}}=1-\pi(x)$
 
+似然函数为：$\prod_{i=1}^N[\pi(x_i)]^{y_i}[1-\pi(x_i)]^{1-y_i}$，定义广义参数：$\beta=(w_1,...,w_n;b)^T$
 
+**损失函数**：$L(w)=\sum_{i=1}^N[y_iln\pi(x_i)+(1-y_i)ln(1-\pi(x_i)]=\sum_{i=1}^N[y_i(\beta^Tx_i)-ln(1+e^{(\beta^Tx_i+b)}]$ 
+
+可使用改进的迭代尺度法或拟牛顿法解决最大熵最优化问题
 
 <img src=".\MachineLearning\逻辑函数近似.png" alt="image-20200611103957090" style="zoom:80%;" />
 
-------
 
-信息论中：
-
-**信息量**  $I(x_0)=-lnP(x_0)$ 表示获取信息的多少，事件发生概率越大，获取到的信息量越少
-
-**熵**  $H(X)=\sum_iP(x_i)I(x_i)$ 表示信息量的期望
-
-**相对熵（KL散度）**  $D_{KL}(P||Q)=\sum_iP(x_i)ln\cfrac{P(x_i)}{Q(x_i)}=-H(P(x))+H(P,Q)$ 表示如果用P来描述目标问题，而不是用Q来描述目标问题，得到的信息增量。在机器学习中，P往往用来表示样本的真实分布，Q用来表示模型所预测的分布，相对熵的值越小，表示P分布和Q分布越接近。可使用$D_{KL}(y||\hat{y})$评估label和predicts之间的差距
-
-**交叉熵** $H(P,Q)=-\sum_iP(x_i)lnQ(x_i)$ ，KL散度中前一部分P的熵不变，一般使用交叉熵作为loss函数
-
--------
-
-**LOSS函数**：$LL=-\sum_i[y_iln\hat{y_i}+(1-y_i)ln(1-\hat{y_i})]$ 
 
 ```python
-from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+import statsmodels.api as sm
+from statsmodels.graphics.mosaicplot import mosaic
+
 data = pd.read_csv(path)
 cols = ["age", "education_num", "capital_gain", "capital_loss", "hours_per_week", "label"]
 data = data[cols]
@@ -592,19 +627,19 @@ testSet["pred"] = testSet.apply(lambda x: 1 if x["prob"] > alpha else 0, axis=1)
 **多元分类**
 
 + 多元逻辑回归：使用多个隐含变量模型
-+ One-vs.-all：将多元问题分为多个二元子问题
++ OvO：一对一，OvR：一对其余，MvM：多对多（纠错输出码，ECOC）
 
 ```python
 from sklearn.linear_model import LogisticRegression
 
-model = LogisticRegression(multi_class='multinomial', solver='sag',max_iter=1000, random_state=42)
-# model = LogisticRegression(multi_class='ovr', solver='sag',max_iter=1000, random_state=42)
+model = LogisticRegression(multi_class='multinomial', solver='sag',max_iter=1000)
+# model = LogisticRegression(multi_class='ovr', solver='sag',max_iter=1000)
 model.fit(data[features], data[labels])
 ```
 
 **非均衡数据集**
 
-数据标签偏向若干个，可通过修改损失函数里不同类别的权重来解决
+数据标签偏向若干个，可通过修改损失函数里不同类别的权重来解决，使用再缩放：$\cfrac{y^*}{1-y^*}=\cfrac{y}{1-y}\times\cfrac{m^-}{m^+}$
 
 ```python
 # 通过调整各个类别的比重，解决非均衡数据集的问题
@@ -765,7 +800,7 @@ dtProb = dtModel.predict_proba(testData[features])[:, 1]
 
 后剪枝中应用较广泛的为**消除误差剪枝法（REP）**，将数据分为训练集、剪枝集、测试集，将不符合剪枝集分类的子树剪掉，且符合从下往上按层下边的全部剪完再剪上边的，称为bottom-up restriction
 
-## 集成方法
+# 集成方法
 
 为了是模型间的组合更加自动化，只使用一种模型最好，将机器学习中比较简单的模型（弱学习）组合成一个预测效果好的复杂模型，即为集成方法（ensemble method）
 
@@ -835,7 +870,7 @@ dtProb = dtModel.predict_proba(testData[features])[:, 1]
 
   GBTs损失函数里没有惩罚项，容易过拟合，可使用XGBoost算法或者与其他模型联结来解决
 
-## 生成式模型
+# 生成式模型
 
 关心数据$\{X,y\}$是如何生成的，X代表事物的表象，y代表事物的内在
 
@@ -847,7 +882,7 @@ dtProb = dtModel.predict_proba(testData[features])[:, 1]
 
 
 
-### 朴素贝叶斯
+## 朴素贝叶斯
 
 **naive Bayes assumption**：假设各特征相互独立：$P(x_1,x_2,...,x_n|y)=\prod_{i=1}^nP(x_i|y)$ ，越独立效果越好
 
@@ -955,7 +990,7 @@ def trainModel(trainData, testData, testDocs, docs):
 
 
 
-### 判别分析
+## 判别分析
 
 discriminant analysis，与朴素贝叶斯相比，允许变量间存在关系
 
@@ -998,7 +1033,7 @@ discriminant analysis，与朴素贝叶斯相比，允许变量间存在关系
 
   调用GaussianNB或QuadraticDiscriminantAnalysis建模
 
-### 隐马尔科夫模型
+## 隐马尔科夫模型
 
 当数据之间不再独立，数据间的顺序会对数据本身造成影响，此时称为序列数据，需要用隐马尔科夫模型（Hidden Markov Model，HMM）来解决
 
@@ -1048,27 +1083,7 @@ discriminant analysis，与朴素贝叶斯相比，允许变量间存在关系
 
 
 
-## 降维
 
-理论：
-
-在二维平面上，要求把点投影到一条直线上，直线的方向向量为$\vec{k}$，|k|=1，则点X1投影点到原点的距离为$kX_1^T$，假设只有两个类别0、1，
-
-**类别中心**：$u_l=\cfrac{1}{N_l}\sum_{i=1}^m1_{\{yi=l\}}kX_1^T$，$N_l$为类别数据个数
-
-**内部方差**：$v_l=\sum_{i=1}^m1_{\{yi=l\}}(kX_1^T-u_l)^2$
-
-降维后，希望各类别中心越远越好，各类别方差越小越好，即
-
-**最大化类别距离**：$max_k(u_0-u_1)^2/(v_0+v_1)$
-
-记**原始数据的类别中心**：$\mu_l=\cfrac{1}{N_l}\sum_{i=1}^m1_{\{yi=l\}}X_i$，则$u_l=k\mu_l^T$
-
-**内部方差矩阵**：$s_l=\sum_{i=1}^m1_{\{yi=l\}}(X_i-\mu_l)^T(X_i-\mu_l)$，则$v_l=ks_lk^T$
-
-记：$s_W=(s_0+s_1)$，$s_B=(\mu_0-\mu_1)^T(\mu_0-\mu_1)$
-
-则最大化类别距离：$max_kks_Bk^T/ks_Wk^T$，得$k^*=s_W^{-1}(\mu_0-\mu_1)$
 
 
 
