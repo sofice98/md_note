@@ -103,6 +103,7 @@ sklearn2pmml(model, "linear.pmml", with_repr=True)
 
 ```python
  from sklearn.model_selection import train_test_split
+ from sklearn.metrics import accuracy_score
  # 每个数据集分一半数据
  X1, X2, y1, y2 = train_test_split(X, y, random_state=0, train_size=0.5) 
  # 用模型拟合训练数据
@@ -155,11 +156,18 @@ cross_val_score(model, X, y, cv=5)
   logitModel = LogisticRegression()
   logitModel.fit(trainData[features], trainData[label])
   logitProb = logitModel.predict_proba(testData[features])[:, 1]
+  # 得到False positive rate和True positive rate
   fpr, tpr, _ = roc_curve(testData[label], logitProb)
+  # 得到AUC
   _auc = auc(fpr, tpr)
+  # 为在Matplotlib中显示中文，设置特殊字体
+  plt.rcParams["font.sans-serif"]=["SimHei"]
   fig = plt.figure(figsize=(6, 6), dpi=80)
   ax = fig.add_subplot(1, 1, 1)
-  ax.plot(fpr, tpr, s, label="%s:%s; %s=%0.2f" % ("模型", i,"曲线下面积（AUC）", _auc))
+  ax.plot(fpr, tpr, "k", label="%s; %s = %0.2f" % ("ROC曲线", "曲线下面积（AUC）", auc))
+  ax.fill_between(fpr, tpr, color="grey", alpha=0.6)
+  legend = plt.legend(shadow=True)
+  plt.show()
   ```
   
 
@@ -221,6 +229,8 @@ $$
 + **贝叶斯估计**
 
   与**极大似然估计（MLE）**不同，贝叶斯估计认为参数是不确定的值，具有一定的概率分布，需要求出给定样本集情况下，参数的最大概率取值，同样也是取对数求偏导解似然方程组，需要知道参数的先验分布。当样本数足够大时，两种的参数估计值相同，当样本小且参数先验分布较准确时，贝叶斯估计较准确
+  
+  常使用**拉普拉斯平滑**来解决训练集某特征不出现的情况，分子加$\lambda$，分母加$N\lambda$
   
 + **凸优化问题**
 
@@ -386,7 +396,7 @@ def linearModel(data):
     model = linear_model.LinearRegression()
     # 训练模型，估计模型参数
     model.fit(trainData[features], trainData[labels])
-    #  斜率：model.coef_[0]，截距：model.intercept_
+    #  斜率：model.coef_，截距：model.intercept_
     
     # 评价模型效果
     # 均方差(The mean squared error)，均方差越小越好
@@ -424,25 +434,6 @@ def linearModel(data):
     resNew = model.fit()
     # 输出新模型的分析结果
     print(resNew.summary())
-```
-
-> 基函数回归
->
-> 通过基函数对原始数据进行变换，从而将变量间的线性回归模型转换为非线性回归模型
-
-```python
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.pipeline import make_pipeline 
-# 7次多项式回归模型
-poly_model = make_pipeline(PolynomialFeatures(7), LinearRegression())
-
-rng = np.random.RandomState(1) 
-x = 10 * rng.rand(50) 
-y = np.sin(x) + 0.1 * rng.randn(50) 
-poly_model.fit(x[:, np.newaxis], y) 
-yfit = poly_model.predict(xfit[:, np.newaxis]) 
-plt.scatter(x, y) 
-plt.plot(xfit, yfit);
 ```
 
 
@@ -540,10 +531,6 @@ $\begin{align*} \mathcal{L} &= \dfrac{1}{2} \left[ w^{(1)}  \left(y^{(1)} - \bol
 $w^{(i)} = \exp \left( - \dfrac{\left(\mathbf{x}^{(i)} - \mathbf{x}\right)^2}{2k^2} \right)$
 
 缺点是每个点做预测时都要使用整个数据集，计算量大，可改进
-
-
-
-
 
 
 
@@ -723,7 +710,7 @@ $$
 
 实际应用中，可以用网格搜寻的办法找到最合适的核函数
 
-<img src="..\MachineLearning\常用核函数.png" alt="image-20200622182951633" style="zoom:67%;" />
+<img src=".\MachineLearning\常用核函数.png" alt="image-20200622182951633" style="zoom:67%;" />
 
 **序列最小最优化算法（SMO）**
 
@@ -759,7 +746,7 @@ model.fit(data[["x1", "x2"]], data["y"])
 
 
 
-## 决策树
+## 决策树(Decision Tree)
 
 使用树形决策流程，将数据进行分类
 
@@ -800,11 +787,13 @@ dtProb = dtModel.predict_proba(testData[features])[:, 1]
 
 后剪枝中应用较广泛的为**消除误差剪枝法（REP）**，将数据分为训练集、剪枝集、测试集，将不符合剪枝集分类的子树剪掉，且符合从下往上按层下边的全部剪完再剪上边的，称为bottom-up restriction
 
+
+
 # 集成方法
 
 为了是模型间的组合更加自动化，只使用一种模型最好，将机器学习中比较简单的模型（弱学习）组合成一个预测效果好的复杂模型，即为集成方法（ensemble method）
 
-**树的集成**
+## **树的集成**
 
 + 平均方法（averaging methods）
 
@@ -872,19 +861,17 @@ dtProb = dtModel.predict_proba(testData[features])[:, 1]
 
 # 生成式模型
 
-关心数据$\{X,y\}$是如何生成的，X代表事物的表象，y代表事物的内在
+关心数据$\{X,y\}$是如何生成的，X代表事物的表象，y代表事物的内在，利用贝叶斯框架，对联合分布概率p(x,y)进行建模得
 
 <img src=".\MachineLearning\贝叶斯定理.png" style="zoom:60%;" />
-
-
-
-利用贝叶斯框架，简化版预测公式：$\hat{y}=argmax_yP(X|y)P(y)$
 
 
 
 ## 朴素贝叶斯
 
 **naive Bayes assumption**：假设各特征相互独立：$P(x_1,x_2,...,x_n|y)=\prod_{i=1}^nP(x_i|y)$ ，越独立效果越好
+
+先根据样本求得先验概率和标签概率，再使用极大似然估计或者贝叶斯估计，求得各个后验概率值，取最大概率作为估计值
 
 包含：伯努利模型，多项式模型，高斯模型
 
