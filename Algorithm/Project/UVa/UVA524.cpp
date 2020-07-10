@@ -18,8 +18,8 @@ bool is_prime(int num) {
 void dfs(int cur) {
     if (cur == n && isp[res[cur - 1] + 1]) {
         //输出每一个结果
-        for (int i = 0; i < n; i++)  printf("%d ", res[i]);
-        printf("\n");
+        for (int i = 0; i < n - 1; i++)  printf("%d ", res[i]);
+        printf("%d\n", res[n - 1]);
         tot++;
         return;
     }
@@ -35,9 +35,13 @@ void dfs(int cur) {
 
 
 int main() {
-    scanf("%d", &n);
-    for (int i = 2; i <= n * 2; i++) isp[i] = is_prime(i);
-    dfs(1);
+    for (int i = 2; i <= 32; i++) isp[i] = is_prime(i);
+    int i = 1;
+    while (scanf("%d", &n) != EOF) {
+        if(i > 1)     printf("\n");
+        printf("Case %d:\n", i++);
+        dfs(1);
+    }
     //输出总数
     //printf("%d\n", tot);
     system("pause");

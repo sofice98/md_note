@@ -120,6 +120,10 @@ from sklearn.model_selection import cross_val_score
 cross_val_score(model, X, y, cv=5)
 ```
 
+**自助法**
+
+独立重复放回式抽样m次，可从原数据集中抽出m个数据作为训练集，剩余的作为测试集，初始训练集中约有63.2%的样本出现在采样集中。适于初始训练集小，或需要使用相互交叠的采样子集的算法（如Bagging）
+
 **最优模型**
 
 + 欠拟合：模型灵活性低，偏差高，模型在验证集的表现与在训练集的表现类似
@@ -250,13 +254,13 @@ $$
   
 + **信息论**
 
-  - **信息量**  $I(x_0)=-lnP(x_0)$ 表示获取信息的多少，事件发生概率越大，获取到的信息量越少
-
-  - **熵**  $H(X)=\sum_iP(x_i)I(x_i)$ 表示信息量的期望
-
-  - **相对熵（KL散度）**  $D_{KL}(P||Q)=\sum_iP(x_i)ln\cfrac{P(x_i)}{Q(x_i)}=-H(P(x))+H(P,Q)$ 表示如果用P来描述目标问题，而不是用Q来描述目标问题，得到的信息增量。在机器学习中，P往往用来表示样本的真实分布，Q用来表示模型所预测的分布，相对熵的值越小，表示P分布和Q分布越接近。可使用$D_{KL}(y||\hat{y})$评估label和predicts之间的差距
-
-  - **交叉熵** $H(P,Q)=-\sum_iP(x_i)lnQ(x_i)$ ，KL散度中前一部分P的熵不变，一般使用交叉熵作为loss函数
+  - **信息量**：$I(x_0)=-logP(x_0)$，表示获取信息的多少，事件发生概率越大，获取到的信息量越少（0log0=0）
+- **熵**：$H(X)=-\sum_iP(x_i)logP(x_0)$，是信息量的期望，熵越大随机变量不确定性越大，当随机变量各取值概率一样时熵达到最大，单位比特
+  - **条件熵**：$H(Y|X)=\sum_{i=1}^np_iH(Y|X=x_i)$ ，表示在已知随机变量X的条件下随机变量Y的不确定性
+- **信息增益**：$g(D,A)=H(D)-H(D|A)$，表示得知特征A的信息而使数据集D的分类的不确定性减少的程度，信息增益大的特征具有更强的分类能力
+  - **信息增益比**：$g_R(D,A)=\cfrac{g(D,A)}{H_A(D)}$
+- **相对熵（KL散度）**：$D_{KL}(P||Q)=\sum_iP(x_i)ln\cfrac{P(x_i)}{Q(x_i)}=-H(P(x))+H(P,Q)$，表示如果用P来描述目标问题，而不是用Q来描述目标问题，得到的信息增量。在机器学习中，P往往用来表示样本的真实分布，Q用来表示模型所预测的分布，相对熵的值越小，表示P分布和Q分布越接近。可使用$D_{KL}(y||\hat{y})$评估label和predicts之间的差距
+  - **交叉熵**：$H(P,Q)=-\sum_iP(x_i)lnQ(x_i)$ ，KL散度中前一部分P的熵不变，一般使用交叉熵作为loss函数
 
 + **监督式降维**
 
@@ -319,6 +323,34 @@ perceptron.score(X,y)
 ```
 
 **当特征维度大时用对偶形式，当样本多时用原始形式**
+
+
+
+## k邻近(k-nearest neighbor)
+
+给定距离度量，选取最“近”的k个点，再根据给定分类决策规则，确定类别
+
+**距离度量**
+
+$x_i,x_j$的距离：$L_P(x_i,x_j)=(\sum_{l=1}^n|x_i^{(l)}-x_j^{(l)}|^P)^{\frac1P}，p\geqslant1$，其中点为n维向量。
+
++ 当$p=1$时，为曼哈顿距离
++ 当$p=2$时，为欧式距离
++ 当$p=\infty$时，为各维度距离最大值
+
+**k值选择**
+
+k值越小，近似误差越小，估计误差越大，模型更复杂，容易过拟合，一般使用交叉验证选取一个比较小的值
+
+**分类决策规则**
+
+多数表决规则等价于经验风险最小化
+
+**kd树**
+
+对k维空间中的实例点进行存储以便对其进行快速检索的树形结构，是一种二叉树。依次选择坐标轴对空间切分，选择训练实例点在坐标轴上的中位点为切分点时，直到子区域没有实例，得到的kd树是平衡的，但搜索效率未必是最优的
+
+搜索时，先找到目标点对应的叶子节点，对应划分点为最邻近点，为再向上一层一层回溯，找兄弟节点中是否有实例包含在超球体内，如有则更新最邻近点，时间复杂度为$O(logn)$
 
 
 
@@ -750,21 +782,34 @@ model.fit(data[["x1", "x2"]], data["y"])
 
 使用树形决策流程，将数据进行分类
 
-寻找最优决策树是一个NP完全问题，只能退而求其次使用贪心算法
+寻找最优决策树是一个**NP完全问题**，只能退而求其次使用贪心算法
+
+1. 特征选择
+
+   选取对训练数据具有分类能力的特征，使用信息增益或者信息增益比选择特征
+
+2. 决策树生成
+
+   + ID3：根节点选择**信息增益**最大的特征，若子节点标签只有一类则作为叶子节点，否则使用子节点的数据子集作为新数据集，计算剩余特征信息增益，再选取最大的，依次递归。相当于用极大似然法，只有树的生成，容易过拟合
+   + C4.5：同上，改为使用**信息增益比**，并且子节点信息增益比小于一定阈值，则选择最多的标签作为该节点的标签
+
+3. 剪枝
+
+   决策树模型属于非参模型，容易发生过拟合问题，解决方法为剪枝
+
+   + 前剪枝：作用于决策树生成过程中，如设置阈值限制高度
+   + 后剪枝：作用与决策树生成之后，将一些不太必要的子树剪掉，剪掉的节点的纯度下降不明显。应用较广泛的为**消除误差剪枝法（REP）**：通过最小化决策树的损失函数：$C_\alpha(T)=\sum_{t=1}^{|T|}N_tH_t(T)+\alpha|T|$，其中$|T|$为树T的叶结点个数，t是树的叶节点，该叶节点有$N_t$个样本；将数据分为训练集、剪枝集、测试集，将不符合剪枝集分类的子树剪掉，且符合从下往上按层下边的全部剪完再剪上边的，称为bottom-up restriction。
 
 
+**分类与回归树（CART）**：假设决策树为二叉树，对回归树用平方误差最小化准则，对分类树用基尼指数$Gini_m$最小化准则，作为特征选择标准，
 
-**评判标准**
 
-要求规则能基本把节点上不同类别的数据分离开，需要定义一个量来衡量数据类别单一程度
-
-**类别在节点上的占比**：$p_{mi}=\cfrac{1}{N_m}\sum_j1_{\{y_j=i\}}$
 
 **不纯度**：$H_m$，越接近0，表示数据类别越单一，有以下几个常用指标
 
 <img src=".\MachineLearning\不纯度指标.png" alt="image-20200622194324629" style="zoom:50%;" />
 
-带有split的为相应指标的不纯度计算
+其中**类别在节点上的占比**：$p_{mi}=\cfrac{1}{N_m}\sum_j1_{\{y_j=i\}}$，带有split的为相应指标的不纯度计算
 
 ```python
 from sklearn.tree import DecisionTreeClassifier
@@ -778,86 +823,127 @@ dtProb = dtModel.predict_proba(testData[features])[:, 1]
 
 决策树优点在于能够考虑多个变量，而且变量的线性变换是稳定的，缺点是模型最后一步算法比较薄弱。为了得到更好的预测效果，可以使用**模型联结主义**，将决策树作为整体模型的一部分和其他模型嵌套使用
 
-**剪枝**
-
-决策树模型属于非参模型，容易发生过拟合问题，解决方法为剪枝
-
-+ 前剪枝：作用于决策树生成过程中，如设置阈值限制高度
-+ 后剪枝：作用与决策树生成之后，将一些不太必要的子树剪掉，剪掉的节点的纯度下降不明显
-
-后剪枝中应用较广泛的为**消除误差剪枝法（REP）**，将数据分为训练集、剪枝集、测试集，将不符合剪枝集分类的子树剪掉，且符合从下往上按层下边的全部剪完再剪上边的，称为bottom-up restriction
 
 
+**连续值处理**
 
-# 集成方法
+将连续值特征的所有取值排序，取各区间中位点作为尝试划分点，选择使信息增益最大的中位点作为最终划分点，其增益作为特征的信息增益
 
-为了是模型间的组合更加自动化，只使用一种模型最好，将机器学习中比较简单的模型（弱学习）组合成一个预测效果好的复杂模型，即为集成方法（ensemble method）
+**缺失值处理**
 
-## **树的集成**
+先计算各特征没有缺失值的信息增益，再乘以一个权重（无缺失值样本所占比例），作为该属性信息增益。再将含缺失值的样本划入所有子节点中，并改变其权重
 
-+ 平均方法（averaging methods）
 
-  **随机森林（random forests）**
 
-  各个树相互独立时，可以降低犯错概率
+**多变量决策树**
 
-  对于分类问题，结果等于各个树中出现次数最多的类别
+每个节点对属性的线性组合进行测试（属性乘以权重的线性分类器），以实现斜划分，减少分类次数
 
-  对于回归问题，结果等于各个树结果的平均值
 
-  随机来源及scikit-learn函数如下：
 
-  <img src=".\MachineLearning\随机森林.png" alt="image-20200623110624949" style="zoom: 67%;" />
+# 集成学习
 
-  **随机森林高维映射（random forest embedding）**
+为了是模型间的组合更加自动化，只使用一种模型最好，将机器学习中比较简单的模型（弱学习器）组合成一个预测效果好的复杂模型（强学习器），即为集成方法（ensemble method）
 
-  可以将随机森林当作非监督式学习使用，随机抽取特征组合成合成数据，与原始数据一起进行决策树训练。当分类结果误差较小时，说明各变量间的相关关系比较强烈
+## 提升方法（boosting methods）
 
-  <img src=".\MachineLearning\rfe.png" alt="image-20200623111544046" style="zoom:50%;" />
+个体学习器间存在强依赖关系，必须串行生成的序列化方法，关注降低偏差
 
-  使用随机森林将低维数据映射到高维后，可以与其他模型联结：
+在分类问题中，能通过改变训练样本的权重，学习多个分类器，将这些分类器进行线性组合，提高分类性能
 
-  <img src=".\MachineLearning\rfe2.png" alt="image-20200623111941192" style="zoom:67%;" />
++ **AdaBoost算法**
 
-  ```python
-  from sklearn.ensemble import RandomTreesEmbedding
-  from sklearn.naive_bayes import BernoulliNB
-  from sklearn.pipeline import Pipeline
-  
-  pipe = Pipeline([("embedding", RandomTreesEmbedding(random_state=1024)),
-          ("model", BernoulliNB())])
-  pipe.fit(data[["x1", "x2"]], data["y"])
-  prob = pipe.predict_proba(np.c_[X1.ravel(), X2.ravel()])[:, 0]
-  # 将模型的预测结果可视化
-  # 生成100*100的预测点集
-  x1 = np.linspace(min(data["x1"]) - 0.2, max(data["x1"]) + 0.2, 100)
-  x2 = np.linspace(min(data["x2"]) - 0.2, max(data["x2"]) + 0.2, 100)
-  X1, X2 = np.meshgrid(x1, x2)
-  # 预测点的类别
-  prob = pipe.predict_proba(np.c_[X1.ravel(), X2.ravel()])[:, 0]
-  prob = prob.reshape(X1.shape)
-  # 画轮廓线
-  ax.contourf(X1, X2, prob, levels=[0.5, 1], colors=["gray"], alpha=0.4)
-  plt.show()
-  ```
+每一轮中提高前一轮被弱分类器分类错误的样本的权值，降低被分类正确的样本权值；组合时，采取加权多数表决的方法，加大分类误差率小的弱分类的权值，减小分类误差率大的弱分类的权值
 
-  
++ **梯度提升决策树（gradient-boosted trees，GBTs）**
 
-+ 提升方法（boosting methods）
+使用梯度提升法，得到更好的预测结果
 
-  **梯度提升决策树（gradient-boosted trees，GBTs）**
+<img src=".\MachineLearning\梯度提升.png" alt="image-20200623115608709" style="zoom: 50%;" />
 
-  使用梯度提升法，得到更好的预测结果
+<img src=".\MachineLearning\梯度下降提升.png" alt="image-20200623115819454" style="zoom: 60%;" />
 
-  <img src=".\MachineLearning\梯度提升.png" alt="image-20200623115608709" style="zoom: 50%;" />
+GBTs的算法步骤如下：
 
-  <img src=".\MachineLearning\梯度下降提升.png" alt="image-20200623115819454" style="zoom: 60%;" />
+<img src=".\MachineLearning\gbts细节.png" alt="image-20200623120120936" style="zoom:60%;" />
 
-  GBTs的算法步骤如下：
+GBTs损失函数里没有惩罚项，容易过拟合，可使用XGBoost算法或者与其他模型联结来解决
 
-  <img src=".\MachineLearning\gbts细节.png" alt="image-20200623120120936" style="zoom:60%;" />
 
-  GBTs损失函数里没有惩罚项，容易过拟合，可使用XGBoost算法或者与其他模型联结来解决
+
+## Bagging方法（Bootstrap Aggregating）
+
+个体学习器间不存在强依赖关系（以样本扰动来近似学习器独立），可同时生成的并行化方法，关注降低方差
+
+**随机森林（random forests）**
+
+在Bagging的基础上，每一步随机选择含k个特征的特征子集，再从中选取一个最优的用于划分，推荐$k=log_2d$，不仅含有**样本扰动**，还有**属性扰动**，通常效果比Bagging好
+
+各个树相互独立时，可以降低犯错概率
+
+对于分类问题，结果等于各个树中出现次数最多的类别；对于回归问题，结果等于各个树结果的平均值
+
+随机来源及scikit-learn函数如下：
+
+<img src=".\MachineLearning\随机森林.png" alt="image-20200623110624949" style="zoom: 67%;" />
+
+**随机森林高维映射（random forest embedding）**
+
+可以将随机森林当作非监督式学习使用，随机抽取特征组合成合成数据，与原始数据一起进行决策树训练。当分类结果误差较小时，说明各变量间的相关关系比较强烈
+
+<img src=".\MachineLearning\rfe.png" alt="image-20200623111544046" style="zoom:50%;" />
+
+使用随机森林将低维数据映射到高维后，可以与其他模型联结：
+
+<img src=".\MachineLearning\rfe2.png" alt="image-20200623111941192" style="zoom:55%;" />
+
+```python
+from sklearn.ensemble import RandomTreesEmbedding
+from sklearn.naive_bayes import BernoulliNB
+from sklearn.pipeline import Pipeline
+
+pipe = Pipeline([("embedding", RandomTreesEmbedding(random_state=1024)),
+        ("model", BernoulliNB())])
+pipe.fit(data[["x1", "x2"]], data["y"])
+prob = pipe.predict_proba(np.c_[X1.ravel(), X2.ravel()])[:, 0]
+# 将模型的预测结果可视化
+# 生成100*100的预测点集
+x1 = np.linspace(min(data["x1"]) - 0.2, max(data["x1"]) + 0.2, 100)
+x2 = np.linspace(min(data["x2"]) - 0.2, max(data["x2"]) + 0.2, 100)
+X1, X2 = np.meshgrid(x1, x2)
+# 预测点的类别
+prob = pipe.predict_proba(np.c_[X1.ravel(), X2.ravel()])[:, 0]
+prob = prob.reshape(X1.shape)
+# 画轮廓线
+ax.contourf(X1, X2, prob, levels=[0.5, 1], colors=["gray"], alpha=0.4)
+plt.show()
+```
+
+
+
+**Staking**
+
+一种学习式结合方法
+
+先从初始训练集训练处初级学习器，然后生成一个新的数据集，其中初级学习器的输出被当作样例输入特征，而样本的标记仍被当为样例标记
+
+
+
+## 多样性
+
+个体学习器准确性越高，多样性越大，则集成越好
+
+分类器$h_i$与$h_j$的预测结果列联表为：
+
+![image-20200707125217670](MachineLearning/分类器列联表.png)
+
+给出常见多样性度量：
+
++ 相关系数：$\rho_{ij}=\cfrac{ad-bc}{\sqrt{(a+b)(a+c)(c+d)(b+d)}}$，取值[-1,1]，
++ Q-统计量：$Q_{ij}=\cfrac{ad-bc}{ad+bc}$，与$\rho_{ij}$符号相同
++ $\kappa$-统计量：$\kappa=\cfrac{p_1-p_2}{1-p_2}，p_1=\cfrac{a+d}{m}，p_2=\cfrac{(a+b)(a+c)+(c+d)(b+d)}{m^2}$，取值多为[0,1]，完全一致则$\kappa=1$
+
+
 
 # 生成式模型
 

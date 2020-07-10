@@ -15,9 +15,9 @@ State st[maxstate], goal;       //状态数组
 int dist[maxstate];             //距离数组
 int vis[362880], fact[9];       //状态访问数组和阶乘表
 int fa[maxstate];               //父节点编号
-const int dx[] = { -1,1,0,0 };
+const int dx[] = { -1,1,0,0 };  //用数组移动
 const int dy[] = { 0,0,-1,1 };
-int front = 1, rear = 2;
+int front = 1, rear = 2;        //头尾指针
 
 void init_lookup_table() {
     fact[0] = 1;
@@ -35,7 +35,7 @@ int try_to_insert(int s) {
     return vis[code] = 1;
 }
 
-int bfs() {
+int bfs() {//bfs+队列
     init_lookup_table();//初始化查找表
     while (front < rear) {
         State& s = st[front];
@@ -71,9 +71,7 @@ void print(int index) {
         else    printf("%d ", st[index][i]);
         if(i%3 == 2)    printf("\n");
     }
-    Sleep(200);
-    if(index != front)
-        system("cls");
+    printf("\n");
     return;
 }
 
@@ -91,9 +89,11 @@ int main() {
     for (int i = 0; i < 9; i++)    scanf("%d", &goal[i]);//终止状态(8 1 5 7 3 6 4 0 2)
     int ans = bfs();
     //可视化移动过程
-    if(ans >0)    visualize(front);
-    if (ans > 0)   printf("%d\n", dist[ans]);
-    else printf("-1\n");
+    if (ans > 0) {
+        visualize(front);
+        printf("steps:%d\n", dist[ans]);
+    }    
+    else printf("cannot deal\n");
 
     system("pause");
     return 0;
