@@ -83,8 +83,8 @@ void Merge(int* a, int low, int mid, int high) {//合并[low...mid]和[mid+1...high
     memcpy(b + low, a + low, sizeof(int) * (high - low + 1));
     int i = low, j = mid + 1, k = low;
     while (i <= mid && j <= high) {
-        if (b[i] <= b[j])  a[k++] = b[i++];
-        else               a[k++] = b[j++];
+        if (b[i] <= b[j])  a[k++] = b[i++];//取左边的
+        else               a[k++] = b[j++];//取右边的
     }
     while (i <= mid)   a[k++] = b[i++];
     while (j <= high)   a[k++] = b[j++];
