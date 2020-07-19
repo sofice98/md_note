@@ -241,6 +241,8 @@ for (maxd = 1;; maxd++) {//迭代加深，每一次循环增加递归最大深�
 
 直接递归时，效率往往底下，原因是相同的子问题被重复计算了多次
 
+通常是找到一个递推式，包含min或max函数，进行打表
+
 ```c++
 //数字三角形
 //递推计算法
@@ -256,6 +258,40 @@ int solve(int i, int j) {
 }
 ```
 
+当使用的数据为当前行和正上方一个时（dp[i]\[..],dp[i-1]\[j]），可以将dp数组压缩成一维数组：
+
+```c++
+int dp[MAX][MAX];//使用前i枚硬币支付j元时所需最少枚数
+int dpzip[MAX];//压缩dp
+int coins[MAX];
+int m, n;//m种硬币，支付n元
+//打表dp
+int solve() {
+    for (int j = 1; j <= n; j++) dp[0][j] = INT_MAX;
+    for (int i = 1; i <= m; i++) {
+        for (int j = 1; j <= n; j++) {
+            if (j - coins[i] >= 0)
+                dp[i][j] = min(dp[i - 1][j], dp[i][j - coins[i]] + 1);
+            else
+                dp[i][j] = dp[i - 1][j];
+        }
+    }
+    return dp[m][n];
+}
+//压缩dp矩阵至一维，减少不需要的空间,也会减少约一半时间，缺点是不能找到使用了哪几个面值的硬币
+int solve2() {
+    for (int j = 1; j <= n; j++) dpzip[j] = INT_MAX;
+    for (int i = 1; i <= m; i++) {
+        for (int j = coins[i]; j <= n; j++) {
+            dpzip[j] = min(dpzip[j], dpzip[j - coins[i]] + 1);
+        }
+    }
+    return dpzip[n];
+}
+```
+
+
+
 
 
 **DAG(Directed acyclic graph)**
@@ -263,6 +299,12 @@ int solve(int i, int j) {
 许多动态规划问题都可以转化为DAG上的最长路最短路或路径计数问题
 
 
+
+
+
+# 字符串
+
+子串要连续，子序列不要求连续
 
 
 
@@ -314,11 +356,37 @@ int try_to_insert(int s) {
 }
 ```
 
+# 查找
+
+
+
+# 排序
+
+常见排序算法：
+
+| 排序算法          | 最好T(n) | 平均T(n) | 最坏T(n) | S(n) | 稳定性 | 每趟全局有序 | 链表         |
+| ----------------- | -------- | -------- | -------- | ---- | ------ | ------------ | ------------ |
+| 直接插入/折半插入 | n        | n2       | n2       | 1    | 1      | 0            | 单/0         |
+| 希尔排序          | n        | n1.25    | n1.5     | 1    | 0      | 0            | 0            |
+| 冒泡排序          | n        | n2       | n2       | 1    | 1      | 1            | 顺链表顺序冒 |
+| 快速排序          | nlogn    | nlogn    | n2       | logn | 0      | 1            | 单           |
+| 简单选择排序      | n2       | n2       | n2       | 1    | 0      | 1            | 单           |
+| 堆排序            | nlogn    | nlogn    | nlogn    | 1    | 0      | 1            | 树链         |
+| 归并排序          | nlogn    | nlogn    | nlogn    | n    | 1      | 0            | 0            |
+| 基数排序          | d(n+r)   | d(n+r)   | d(n+r)   | r    | 1      | 0            | 单           |
+| 计数排序          | n+k      | n+k      | n+k      | k    | 1      | 1            | 单           |
+
+
+
+```
+
+```
 
 
 
 
-# 技巧
+
+# 小技巧
 
 + 编码解码映射哈希可提高速度
 
@@ -343,7 +411,13 @@ int try_to_insert(int s) {
   fprintf(fout, "%d", x);
   ```
   
-+ 
++ 二分搜索：
+
+  lower_bound(起始地址，结束地址，要查找的数值) 返回的是数值 **第一个** 出现的位置，大于等于
+
+  upper_bound(起始地址，结束地址，要查找的数值) 返回的是数值 **最后一个** 出现的位置，大于
+
+  binary_search(起始地址，结束地址，要查找的数值)  返回的是是否存在这么一个数，是一个**bool值**
 
 
 
