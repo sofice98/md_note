@@ -92,19 +92,22 @@ remainder, whole_part = np.modf(arr)
 
 ### 一元函数
 
-| 函数名                   | 描述                    |
-| ------------------------ | ----------------------- |
-| abs, fabs                | 整数、浮点数绝对值      |
-| sqrt, square             | 平方根，平方            |
-| exp                      | exp x                   |
-| log, log10, log2         | 以e,10,2为底的对数      |
-| sign                     | 符号函数                |
-| ceil, floor              | 向上、向下取整          |
-| rint                     | 保留到整数，并保持dtype |
-| modf                     | 返回小数、整数部分      |
-| isnan, isinf             | 是否是NaN，是否是无限   |
-| sin, cos, arcsin, arccos | 三角函数，反三角函数    |
-| logical_not              | 按位取反                |
+| 函数名                   | 描述                     |
+| ------------------------ | ------------------------ |
+| abs, fabs                | 整数、浮点数绝对值       |
+| sqrt, square             | 平方根，平方             |
+| exp                      | exp x                    |
+| log, log10, log2         | 以e,10,2为底的对数       |
+| sign                     | 符号函数                 |
+| ceil, floor              | 向上、向下取整           |
+| rint                     | 保留到整数，并保持dtype  |
+| modf                     | 返回小数、整数部分       |
+| isnan, isinf             | 是否是NaN，是否是无限    |
+| sin, cos, arcsin, arccos | 三角函数，反三角函数     |
+| logical_not              | 按位取反                 |
+| tile                     | 重复增加数组             |
+| argsort                  | 排序，返回从小到大的下标 |
+| linespace                | 产生线性序列             |
 
 ### 二元函数
 
@@ -433,7 +436,7 @@ pd.concat([df3, df4], axis='col')
 
 # Mataplotlib
 
-
+<img src="./DataScience/anatomy.png" style="zoom: 80%;" />
 
 
 
