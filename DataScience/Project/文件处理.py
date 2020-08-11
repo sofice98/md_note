@@ -19,10 +19,10 @@ def file2matrix(filename):
     for line in fr.readlines():
         line = line.strip()                             # 截掉前后空格和换行
         listFromLine = line.split('\t')
-        returnMat[index, :] = listFromLine[0:3]
-        classLabelVector.append(int(listFromLine[-1]))  # 将字符串标签转化为整型标签
+        returnMat[index, :] = listFromLine[0:3]         # 前几列作为特征
+        classLabelVector.append(int(listFromLine[-1]))  # 最后一列数字作为标签
         index += 1
-    return returnMat, classLabelVector
+    return returnMat
 
 
 # 读csv文件

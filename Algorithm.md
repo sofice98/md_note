@@ -41,12 +41,18 @@ typedef struct Node {
     Node *parent, *left, *right;
     Node(int v = 0) :value(v), parent(nullptr), left(nullptr), right(nullptr) {}
 }BTree;
-//有根树，左孩子右兄弟
+//有根树
+//左孩子右兄弟
 typedef struct Node{ 
     int value;
     Node *parent, *left, *right;
     Node(int v = 0) :value(v), parent(nullptr), left(nullptr), right(nullptr) {}
 }Tree;
+//孩子指针数组
+typedef struct node {
+    int value;
+    vector<node*> children;
+};
 ```
 
 
@@ -54,10 +60,74 @@ typedef struct Node{
 ## 图
 
 ```c++
-//顺序存储
-int G[max][max];//邻接矩阵
-vector<vector<int>> G;//邻接表
-//链式存储
+//邻接矩阵
+//获取uv关系，添加删除边都为o(1)
+//稀疏图浪费空间；基本型只能记录uv间一个关系
+int graph[maxv][maxv];
+
+//邻接表
+//只需o(E)空间
+//获取uv关系时非o(1)；难以有效删除边
+vector<vector<int>> graph;
+vector<int> graph[MAX];
+//加权邻接表，first为终点，second为边权值
+vector<pair<int, int>> graph[MAX];
+
+//边结点
+struct Edge {
+    int u, v, w;
+    Edge(int u = 0,int v = 0,int w = 0) :
+        u(u), v(v), w(w) {}
+    bool operator< (const Edge& e) const {
+        return w < e.w;
+    }
+};    
+```
+
+**图遍历**
+
+```c++
+int G[maxv][maxv];
+bool vis[maxv];
+int n;
+int u, v;
+f(i, 1, m) {
+    scanf("%d %d", &u, &v);
+    G[u][v] = 1; G[v][u] = 1;
+}
+//bfs
+void bfs(int cur) {
+    queue<int> q;
+    q.push(cur);
+    while (!q.empty()) {
+        int i = q.front();
+        q.pop();
+        vis[i] = true;
+        for (int j = 0; j < n; j++) {
+            if (!vis[j] && G[i][j])    q.push(j);
+        }
+    }
+
+}
+void bfsTraverse() {
+    memset(vis, 0, sizeof(vis));
+    for (int i = 0; i < n; i++) {
+        if (!vis[i])     bfs(i);
+    }
+}
+//dfs
+void dfs(int u) {
+    vis[u] = true;
+    for (int v = 0; v < n; v++) {
+        if (!vis[v] && G[u][v])    dfs(v);
+    }
+}
+void dfsTraverse() {
+    memset(vis, 0, sizeof(vis));
+    for (int i = 0; i < n; i++) {
+        if (!vis[i])     dfs(i);
+    }
+}
 ```
 
 **使用数组来变换方向**
@@ -67,6 +137,43 @@ const int dx[] = { -1,1,0,0 };
 const int dy[] = { 0,0,-1,1 };
 int newx = x + dx[d];
 int newy = y + dy[d];
+```
+
+**最短路径**
+
+```c++
+int n;
+vector<pair<int, int>> graph[MAX];//加权邻接表
+int dist[MAX];//距离表
+bool vis[MAX];//访问表
+int f[MAX];//父节点
+
+//迪杰斯特拉算法+优先级队列，Tn=o((V+E)logV)
+void Dijkstra(int src) {
+    //初始化
+    fill(dist, dist + MAX, INF);
+    memset(vis, 0, sizeof(vis));
+    dist[src] = 0; parent[src] = -1;
+    //优先级队列，pair<dist[i],i>，dist小的优先
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+    pq.push(make_pair(0, src)); 
+    while (!pq.empty()) {
+        int u = pq.top().second;
+        int d = pq.top().first;
+        pq.pop();
+        if (vis[u]) continue;
+        vis[u] = true;
+        for (auto& item : graph[u]) {
+            int v = item.first;
+            int w = item.second;
+            if (!vis[v] && dist[v] > d + w) {
+                dist[v] = d + w;
+                pq.push(make_pair(dist[v], v));
+                parent[v] = u;
+            }
+        }
+    }
+}
 ```
 
 **拓扑排序**
@@ -90,26 +197,211 @@ void euler(int u){
 
 
 
+## 并查集
+
+一种用互质集合对数据进行分类管理的数据结构
+
+主要包括合并与查找操作
+
+```c++
+struct DisjointSet {
+    vector<int> rank, p;//高度，父指针
+    DisjointSet() {}
+    DisjointSet(int size) {
+        rank.resize(size, 0);
+        p.resize(size, 0);
+        for (int i = 0; i < size; i++)     makeSet(i);
+    }
+    //建立
+    void makeSet(int x) {
+        p[x] = x;
+        rank[x] = 0;
+    }
+    //合并
+    void unite(int x, int y) {
+        int xp = findSet(x);
+        int yp = findSet(y);
+        if (rank[xp] > rank[yp])  p[yp] = xp;
+        else {
+            p[xp] = yp;
+            if (rank[xp] == rank[yp])    rank[yp]++;
+        }
+    }
+    //查找
+    int findSet(int x) {
+        if (x != p[x]) {
+            p[x] = findSet(p[x]);
+        }
+        return p[x];
+    }
+
+    bool same(int x, int y) {
+        return findSet(x) == findSet(y);
+    }
+};
+```
+
+
+
+## KDTree
+
+用于k维的范围搜索树
+
+```c++
+struct Node {//树节点
+    int location;
+    int p, l, r;
+    Node() {}
+};
+struct Point {//数据点
+    int id, x, y;
+    Point() {}
+    Point(int id, int x, int y) :id(id), x(x), y(y) {}
+    bool operator<(const Point& p) const {
+        return id < p.id;
+    }
+    void print() {
+        printf("%d\n", id);
+    }
+};
+//建树，Tn=o(nlog^2n)
+int makeKDTree(int l, int r, int depth) {
+    if (l >= r) return NIL;
+    int mid = l + r >> 1;
+    int t = np++;
+    if (depth % 2 == 0)  sort(P + l, P + r, lessX);
+    else    sort(P + l, P + r, lessY);
+    T[t].location = mid;
+    T[t].l = makeKDTree(l, mid, depth + 1);
+    T[t].r = makeKDTree(mid + 1, r, depth + 1);
+    return t;
+}
+//查找，Tn=o(n^(1-1/k)+d)，d为指定范围内点的数量
+void find(int v, int sx, int tx, int sy, int ty, int depth, vector<Point>& ans) {
+    int x = P[T[v].location].x;
+    int y = P[T[v].location].y;
+
+    if (sx <= x && x <= tx && sy <= y && y <= ty)
+        ans.push_back(P[T[v].location]);
+    if (depth % 2 == 0) {
+        if (T[v].l != NIL && sx<=x) 
+            find(T[v].l, sx, tx, sy, ty, depth + 1, ans);
+        if (T[v].r != NIL && x <= tx)
+            find(T[v].r, sx, tx, sy, ty, depth + 1, ans);
+    }
+    else {
+        if (T[v].l != NIL && sy <= y)
+            find(T[v].l, sx, tx, sy, ty, depth + 1, ans);
+        if (T[v].r != NIL && y <= ty)
+            find(T[v].r, sx, tx, sy, ty, depth + 1, ans);
+    }
+}
+```
+
+
+
+## 线段树
+
+
+
+## 树状数组
+
+
+
+## 单调队列
+
+求数组中一段滑动长度内的最大值或最小值，Tn=o(n)
+
+```c++
+typedef struct node {        //队列的节点，包含元素在列表中原来的位置和值
+    int order;
+    int value;
+};
+deque<node> hq;    //定义节点类型单调队列
+vector<int> m;      //用于储存最大值序列
+
+int n, k, t;           //滑动窗口长度为k，t用于暂时储存输入
+node tmp;
+scanf("%d%d", &n, &k);
+for (int i = 0; i < n; i++) {
+    scanf("%d", &t);
+    while (!hq.empty() && i - hq.front().order >= k) hq.pop_front(); //剔除队头过期元素   
+    while (!hq.empty() && hq.back().value <= t) hq.pop_back();     //剔除队尾小于将入列的值，保证队头为最大值
+    tmp.value = t;  //节点入列
+    tmp.order = i;
+    hq.push_back(tmp);
+    if (i >= k - 1) //开始输出           
+        m.push_back(hq.front().value);
+}
+//前缀和+单调队列
+//求区间长度[s,t]的最大子串和
+int a[MAX];//[1...n]
+int sum[MAX];//前缀和[1...n]
+sum[0] = 0;//考虑从第一个元素开始
+for (int i = 1; i <= n; i++)	sum[i] = sum[i - 1] + a[i];
+hq.push_back(0);
+for (int i = 1; i <= n; i++) {
+    while (!hq.empty() && sum[hq.back()] > sum[i]) hq.pop_back();
+    hq.push_back(i);
+    while (!hq.empty() && t < i - hq.front()) hq.pop_front();
+    ans = max(ans, sum[i] - sum[hq.front()]);
+}
+printf("%d\n", ans);
+```
+
+
+
 
 
 # 搜索
 
 ## 二分搜索
 
+满足单调，有最大最小值
+
+一般用于求最小化最大值、最大化最小值
+
 ```c++
 //二分模版
-int binarySearch(int* A, int key) {
-    int left = 0;
-    int right = n;
-    while (left < right) {
-        int mid = left + right >> 1;
-        if (A[mid] == key) return mid;
-        else if (key < A[mid]) right = mid;
-        else    left = mid + 1;
-    }
-    return false;
+int left = 0;
+int right = n;
+while (left < right) {
+    int mid = left + right >> 1;
+    if (A[mid] == key) return mid;
+    else if (key < A[mid]) right = mid;
+    else    left = mid + 1;
 }
+//双分支，解决问题常用，关键在于建模和check()   
+int ans;          //记录答案
+while (right - left > 1) {//一定要有1，否则跳不出循环
+        int mid = left + right >> 1;
+        if (check(mid)){  //检查条件，如果成立
+            ans = mid;    
+            left = mid;
+        }
+        else   right = mid;        
+}
+//实数二分
+while(right - left > eps)  　{ ... } //给定精度
+for(int i = 0; i < 100; i++) { ... }//精度为1/2^100
 
+//三分法求单峰、谷极值 
+//实数
+while(R-L > eps){  
+    double k =(R-L)/3.0;
+    double mid1 = L+k, mid2 = R-k;
+    if(check(mid1) > check(mid2)) 
+        R = mid2;
+    else   L = mid1;
+}
+//整数
+while(R - L > 1){  
+    int mid1 = left + (right - left)/3;
+    int mid2 = right- (right - left)/3;
+    if(check(mid1) > check(mid2))
+        R = mid2;
+    else   L = mid1;
+}
 ```
 
 lower_bound(起始地址，结束地址，要查找的数值) 返回的是数值 **第一个** 出现的位置，大于等于
@@ -142,7 +434,7 @@ void dfs(int cur) {
 }
 ```
 
-> Eight Queens，UVA524
+
 
 ## 状态空间搜索
 
@@ -225,8 +517,6 @@ for (maxd = 1;; maxd++) {//迭代加深，每一次循环增加递归最大深�
 
 
 
-> UVA11212，UVA12558
-
 
 
 
@@ -241,7 +531,7 @@ for (maxd = 1;; maxd++) {//迭代加深，每一次循环增加递归最大深�
 
 直接递归时，效率往往底下，原因是相同的子问题被重复计算了多次
 
-通常是找到一个递推式，包含min或max函数，进行打表
+设置dp含义，求dp转移方程，设置剪枝
 
 ```c++
 //数字三角形
@@ -408,15 +698,57 @@ void generate_subset(int n) {
 
 **list双向链表**：可以在front处操作，insert(p,x)，erase(p)都为o(1)
 
+**set集合**：insert(key)，erase(key)，find(key)都为o(logn)
 
+**map字典**：insert( (key，val) )，erase(key)，find(key)都为o(logn)
+
+**priority_queue优先级队列**：默认大根堆
+
+```c++
+//降序队列，大顶堆，大的优先
+priority_queue <int,vector<int>,less<int> >q;
+//升序队列，小顶堆，小的优先，或者默认的乘-1
+priority_queue <int,vector<int>,greater<int> > q;
+//自定义排序，重载仿函数
+struct cmp{
+    bool operator()(const pair<int, int> &a, const pair<int, int> &b){
+            return a.first + a.second < b.first + b.second;//返回true时，说明a的优先级低于b
+    }
+};
+priority_queue<pair<int, int>, vector<pair<int, int>>, cmp> pq;
+//自定义node，重载操作符
+struct node{
+      int x, y;
+      node(int x, int y):x(x),y(y){}
+      bool operator< (const node &b) const {
+           if(x == b.x)  return y >= b.y;
+           else return x > b.x;
+      }
+};
+priority_queue<node> pq;
+```
 
 
 
 # 小技巧
 
++ 常用变量
+
+  ```c++
+  #include<bits/stdc++.h>
+  using namespace std;
+  typedef long long ll;
+  constexpr int MOD = 1e9 + 7;
+  constexpr int INF = 0x7fffffff;
+  constexpr int MAX = 10000;
+  constexpr double eps = 1e-7;
+  #define f(i, a, b) for(int i = a;i <= b;i++)
+  #define equals(a, b) ( fabs( (a) - (b) ) < eps )
+  ```
+
 + 编码解码映射哈希可提高速度
 
-+ 提前求出素数表，阶乘表可加快速度
++ 提前求出素数表，阶乘表或多个test公共变量，可加快速度
 
 + ```c++
   while (scanf("%d", &n) == 1 && n != 0)//n=0结束
@@ -435,8 +767,6 @@ void generate_subset(int n) {
   fprintf(fout, "%d", x);
   ```
   
-+ 即使是暴力枚举，也是要认真分析问题的，以减少枚举量
-
 + 枚举排列：
 
   ```c++
@@ -450,7 +780,37 @@ void print_permutation(序列A，集合S){
   
   或使用next_permutation函数
   
-+ 
++ 生成一个大随机数
+  ```c++
+  unsigned long ulrand(){          
+      return (
+        (((unsigned long)rand()<<24)& 0xFF000000ul)
+       |(((unsigned long)rand()<<12)& 0x00FFF000ul)
+       |(((unsigned long)rand())    & 0x00000FFFul));
+  }
+  ```
+  
++ 快速读
+  
+  ```c++
+  iostream::sync_with_stdio(false);
+  inline int read() {
+        int ret = 0, op = 1;
+        char c = getchar();
+        while (!isdigit(c)) {
+            if (c == '-') op = -1; 
+            c = getchar();
+        }
+        while (isdigit(c)) {
+            ret = (ret << 3) + (ret << 1) + c - '0';
+            c = getchar();
+	      }
+	      return ret * op;
+	  }
+	```
+
+
+
 
 
 # 注意事项
@@ -459,8 +819,7 @@ void print_permutation(序列A，集合S){
 + 赋值时记得类型转换
 + 一定要加上对特殊情况的判别，不但会提高正确率，还能减少Runtime（如开头加上对空参数的判别输出）
 + 大数组申请为全局变量
-
-
++ 即使是暴力枚举，也是要认真分析问题的，以减少枚举量
 
 
 
