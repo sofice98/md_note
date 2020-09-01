@@ -92,22 +92,23 @@ remainder, whole_part = np.modf(arr)
 
 ### 一元函数
 
-| 函数名                   | 描述                     |
-| ------------------------ | ------------------------ |
-| abs, fabs                | 整数、浮点数绝对值       |
-| sqrt, square             | 平方根，平方             |
-| exp                      | exp x                    |
-| log, log10, log2         | 以e,10,2为底的对数       |
-| sign                     | 符号函数                 |
-| ceil, floor              | 向上、向下取整           |
-| rint                     | 保留到整数，并保持dtype  |
-| modf                     | 返回小数、整数部分       |
-| isnan, isinf             | 是否是NaN，是否是无限    |
-| sin, cos, arcsin, arccos | 三角函数，反三角函数     |
-| logical_not              | 按位取反                 |
-| tile                     | 重复增加数组             |
-| argsort                  | 排序，返回从小到大的下标 |
-| linespace                | 产生线性序列             |
+| 函数名                   | 描述                                                   |
+| ------------------------ | ------------------------------------------------------ |
+| abs, fabs                | 整数、浮点数绝对值                                     |
+| sqrt, square             | 平方根，平方                                           |
+| exp                      | exp x                                                  |
+| log, log10, log2         | 以e,10,2为底的对数                                     |
+| sign                     | 符号函数                                               |
+| ceil, floor              | 向上、向下取整                                         |
+| rint                     | 保留到整数，并保持dtype                                |
+| modf                     | 返回小数、整数部分                                     |
+| isnan, isinf             | 是否是NaN，是否是无限                                  |
+| sin, cos, arcsin, arccos | 三角函数，反三角函数                                   |
+| logical_not              | 按位取反                                               |
+| tile                     | 重复增加数组                                           |
+| argsort                  | 排序，返回从小到大的下标                               |
+| linespace                | 产生线性序列                                           |
+| squeeze                  | 从数组的形状中删除单维度条目，即把shape中为1的维度去掉 |
 
 ### 二元函数
 
@@ -437,6 +438,177 @@ pd.concat([df3, df4], axis='col')
 # Mataplotlib
 
 <img src="./DataScience/anatomy.png" style="zoom: 80%;" />
+
+
+
+
+
+# Tensorflow
+
+**计算图**：是包含节点和边的网络 
+
+**运算操作对象**（Operation Object, OP）:张量（tensor）对象（常量、变量和占位符）
+
+为了构建计算图，需要定义所有要执行的常量、变量和运算操作
+
+TensorFlow 支持以下三种类型的张量：
+
+1. **常量**：常量是其值不能改变的张量
+
+   ```python
+   t_1 = tf.constant([4,3,2])
+   t_2 = tf.constant(1，shape=[11])
+   ```
+
+2. **变量**：当一个量在会话中的值需要更新时，使用变量来表示
+
+   ```python
+   t_a = tf.Variable(t_1)# 用常量初始化
+   t_b = tf.Variable(t_a, name='b')# 用变量初始化
+   initial_op = tf.global_variables_initializer()# 必须显式初始化所有的声明变量
+   saver = tf.train.Saver()# 保存变量
+   ```
+
+3. **占位符**：用于将值输入 TensorFlow 图中。它们可以和  feed_dict  一起使用来输入数据。在训练神经网络时，它们通常用于提供新的训练样本。在会话中运行计算图时，可以为占位符赋值。这样在构建一个计算图时不需要真正地输入数据。需要注意的是，占位符不包含任何数据，因此不需要初始化它们
+
+   ```python
+   tf.placeholder(dtype,shape=None,name=None)
+   ```
+   
+
+
+
+## 常用公共函数
+
+```python
+# 对应元素加减乘除，平方，次方，开方，自增减
+tf.add(a, b)
+tf.subtract(a, b)
+tf.multiply(a, b)
+tf.divide(b, a)
+tf.square(a)
+tf.pow(a, 3)
+tf.sqrt(a)
+x.assign_add(delta_x)
+x.assign_sub(delta_x)
+# 运算
+tf.reduce_min(x)
+tf.reduce_max(x)
+tf.reduce_mean(x)
+tf.reduce_sum(x)
+# 判断
+c = tf.where(tf.greater(a, b), a, b)  # 若a>b，返回a对应位置的元素，否则返回b对应位置的元素
+tf.equal(pred, y_test)
+tf.greater(a, b)2
+tf.less(a, b)
+# 枚举循环
+seq = ['one', 'two', 'three']
+for i, element in enumerate(seq):
+    print(i, element)
+# 最值索引
+tf.argmin(test, axis=0)
+tf.argmax(test, axis=0)
+# 矩阵乘
+tf.matmul(a, b)
+# 强制转换
+tf.cast(x1, tf.int32)
+# 特定数组
+tf.zeros([2,3],tf.int32)
+tf.ones_like(t_1)
+tf.fill([2,3],10)#全为指定值
+tf.linspace(start,stop,num)# 包括stop，num为个数
+tf.range(start=0,limit,delta=1)# 不包括limit，delta为增量
+# 随机数
+tf.set_random_seed(54)
+tf.random.normal([M,N], mean=0.0, stddev=1.0, seed)# 正态分布
+tf.random.truncated_normal([M,N], mean=0.0, stddev=1.0, seed)# 截断式正态分布
+tf.random.uniform([M,N], minval=0.0, maxval=1.0)# 均匀分布
+tf.random_crop(t_1,[2,5],seed)# 随机切片
+tf.random_shuffle(t_1)# 沿着第一维随机排列张量
+# numpy与tensor转化
+b=tf.convert_to_tensor(a,dtype=tf.int32)
+b.numpy()
+# 拼接
+tf.concat([a,b],axis=0)
+tf.stack([a,b], axis=0)# 增加新维度
+```
+
+
+
+## 数值计算
+
+```python
+# 特征标签绑定，batch为配合enumerate，一次循环一个batch
+dataset = tf.data.Dataset.from_tensor_slices((features, labels)).batch(32)
+# 梯度下降
+x = tf.Variable(tf.constant(3.0))
+with tf.GradientTape() as tape:
+    loss = tf.pow(x, 2)
+grad = tape.gradient(y, x)
+x.assign_sub(grad)
+# 多个参数梯度更新
+variables = [w1, b1]
+grads = tape.gradient(loss, variables)
+w1.assign_sub(lr * grads[0])
+b1.assign_sub(lr * grads[1])
+
+# 将标签转化为独热编码，再由argmax得到原编号
+labels = tf.constant([1, 0, 2])  
+output = tf.one_hot(labels, depth=classes)#classes分类个数
+labels = tf.argmax(output, axis=1)
+# 去掉y中纬度1
+tf.squeeze(y) 
+# 使y_dim符合概率分布
+tf.nn.softmax(y_dim) 
+# 激活函数
+tf.nn.sigmoid(x)
+tf.math.tanh(x)
+tf.nn.relu(x)
+tf.nn.leaky_relu(x)
+# 均方误差
+loss_mse = tf.reduce_mean(tf.square(y_train - y))
+# 交叉熵
+tf.losses.categorical_crossentropy(y_, y)# y_标准，y预测
+tf.nn.softmax_cross_entropy_with_logits(y_, y)# 集成softmax和交叉熵
+# 正则化项
+tf.nn.l2_loss(w1)
+# 生成网格待预测特征
+# xx在-3到3之间以步长为0.1，yy在-3到3之间以步长0.1,生成间隔数值点
+xx, yy = np.mgrid[-3:3:.1, -3:3:.1]
+# 将xx, yy拉直，并合并配对为二维张量，生成二维坐标点
+grid = np.c_[xx.ravel(), yy.ravel()]
+grid = tf.cast(grid, tf.float32)
+```
+
+
+
+优化器
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

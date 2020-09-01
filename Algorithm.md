@@ -548,39 +548,33 @@ int solve(int i, int j) {
 }
 ```
 
-当使用的数据为当前行和正上方一个时（dp[i]\[..],dp[i-1]\[j]），可以将dp数组压缩成一维数组：
+**经典动态规划问题**
 
-```c++
-int dp[MAX][MAX];//使用前i枚硬币支付j元时所需最少枚数
-int dpzip[MAX];//压缩dp
-int coins[MAX];
-int m, n;//m种硬币，支付n元
-//打表dp
-int solve() {
-    for (int j = 1; j <= n; j++) dp[0][j] = INT_MAX;
-    for (int i = 1; i <= m; i++) {
-        for (int j = 1; j <= n; j++) {
-            if (j - coins[i] >= 0)
-                dp[i][j] = min(dp[i - 1][j], dp[i][j - coins[i]] + 1);
-            else
-                dp[i][j] = dp[i - 1][j];
-        }
-    }
-    return dp[m][n];
-}
-//压缩dp矩阵至一维，减少不需要的空间,也会减少约一半时间，缺点是不能找到使用了哪几个面值的硬币
-int solve2() {
-    for (int j = 1; j <= n; j++) dpzip[j] = INT_MAX;
-    for (int i = 1; i <= m; i++) {
-        for (int j = coins[i]; j <= n; j++) {
-            dpzip[j] = min(dpzip[j], dpzip[j - coins[i]] + 1);
-        }
-    }
-    return dpzip[n];
-}
-```
++ 0/1背包
 
+  $dp[i][j]=max(dp[i-1][j],dp[i-1][j-w[i]]+v[i]$
 
+  可以用滚动数组，j需倒序计算，$dp[j] = max(dp[j], dp[j - w[i]] + v[i])$
+
++ 硬币问题  
+
+  $dp[i][j] = min(dp[i - 1][j], dp[i][j - coins[i]] + 1)$
+
+  滚动数组：$dp[j] = min(dp[j], dp[j - coins[i]] + 1)$
+  
++ 最长公共子序列
+
+  $dp[i][j] = dp[i - 1][j - 1] + 1，\quad\quad\quad\quad x[i] = y[j]\\dp[i][j] = max(dp[i][j - 1], dp[i - 1][j])，x[i] \not= y[j]$
+
++ 最长递增子序列
+
+  $dp[i]=max(dp[j])\quad 0<j<i\,,A_j<A_i\quad T(n)=O(n^2)$
+
+  二分：大于L末尾元素添加，否则lower_bound(a[i])=a[i]
+
++ 编辑距离
+
+  $dp[i][j] = dp[i - 1][j - 1] + 1，\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad s1[i] = s2[j]\\dp[i][j] = min(dp[i][j - 1], dp[i - 1][j], dp[i - 1][j-1])+1，s1[i] \not= s2[j]$
 
 
 
@@ -600,13 +594,129 @@ int solve2() {
 
 # 数论
 
-## 最大公因数
+## 素数
+
+关于素数，有以下有趣的事实：
+   （1）素数的数量有无限多。
+   （2）素数的分布。随着*x*x的增大，素数的分布越来越稀疏；第n个素数渐进于logn；随机整数*x*x是素数的概率是1/log *x*x。
+   （3）对于任意正整数n，存在至少n个连续的正合数。
+   有大量关于素数的猜想，著名的有：
+   （1）波特兰猜想。对任意给定的正整数n > 1，存在一个素数p，使得n < p < 2n。已经证明。
+   （2）孪生素数猜想。存在无穷多的形如p和p+2的素数对。
+   （3）素数等差数列猜想。对任意正整数n >2，有一个由素数组成的长度为n的等差数列。
+   （4）哥德巴赫猜想。每个大于2的正偶数可以写成两个素数的和。这是最有名的素数猜想，也是最令人头疼的猜想，已经困扰数学家3世纪。至今为止，最好的结果仍然是陈景润1966年做出的。
+
++ **费马素性测试**
+
+**费马小定理**：设n是素数，*a*a是正整数且与n互质，那么有$a^{n−1}≡1(mod\,\,n)$
+
+为了测试n是否为素数，在1~n之间任选一个随机的基值*a*a，注意*a*a并不需要与n互质：
+  （1）如果$a^{n−1}≡1(mod\,\,n)$不成立，那么n肯定不是素数。这实际上是费马小定理的逆否命题。
+  （2）如果$a^{n−1}≡1(mod\,\,n)$成立，那么n很大概率是素数，尝试的a越多，n是素数的概率越大。称n是一个基于a的**伪素数**。
+
+可惜的是，从（2）可以看出费马素性测试并不是完全正确的。对某个a值，总有一些合数被误判而通过了测试；不同的*a*a值，被误判的合数不太一样。特别地，有一些合数，不管选什么a值，都能通过测试。这种数叫做**Carmichael数**，前三个数是561、1105、1729。不过，Carmichael数很少，前1亿个正整数中只有255个。而且当n趋向无穷时，Carmichael数的分布极为稀疏，费马素性测试几乎不会出错，所以它是一种相当好的方法。
+
++ **Miller-Rabin素性测试**
+
+  用费马测试排除掉非Carmichael数，而大部分Carmichael数用下面介绍的推论排除
+
+  如果p是一个奇素数，且e≥1，则方程$x^2≡1(mod\,\,p^e)$，仅有两个解：x = 1和x = -1。
+
+  令 $n−1=2^tu$，其中u是奇数，t是正整数，即n-1的二进制表示，是奇数u的二进制表示，后面加t个零。先算出$a^u\,mod\,\,n$，然后对结果连续平方t次取模。
+
+  设有s个a，共做s次测试，出错的概率是$2^{-s}$。当s = 50时，出错概率已经小到可以忽略不计了。
+
+```c++
+//小素数判定
+bool isPrime(int x) {
+    if (x < 2) return false;
+    else if (x == 2) return true;
+    if (x & 1 == 0) return false;
+    for (int i = 3; i * i <= x; i += 2) 
+        if (x % i == 0) return false;
+    return true;
+}
+//大素数判定
+bool witness(uLL a, uLL n){       // Miller-Rabin素性测试。返回true表示n是合数
+        uLL u = n-1; 
+        int t = 0;              // n-1的二进制，是奇数u的二进制，后面加t个零
+        while(u & 1 == 0) u = u >> 1, t++;    // 整数n-1末尾有几个0，就是t
+        uLL x1, x2;
+        x1 = fast_pow(a,u,n);            // 先计算  a^u mod n
+        
+        for(int i = 1; i <= t; i++) {        // 做t次平方取模
+            x2 = fast_pow(x1,2,n);       // x1^2 mod n
+            if(x2 == 1 && x1 != 1 && x1 != n-1) return true;  //用推论判断
+            x1 = x2;
+        }
+        if(x1 != 1) return true;         //最后用费马测试判断是否为合数
+        return false;
+}
+
+bool MillerRabin(uLL n,int s){            //对n做s次测试
+    if(n < 2)  return 0;  
+    if(n == 2) return 1;                   
+    if(n & 1 == 0 ) return 0;            
+
+	for(int i = 0;i < s && i < n;i++){   //做s次测试
+		uLL a = rand() % (n - 1) + 1;     
+ 		if(witness(a,n))  return false;      //n是合数，返回0           	              
+	}
+ 	return true;                            //n是素数，返回1
+}
+//素数筛
+int prime[MAX];//第i个素数
+bool is_prime[MAX + 1];//第i个是否为素数
+int sieve(int n) {
+    int p = 0;
+    for (int i = 0; i <= n; i++) is_prime[i] = true;
+    is_prime[0] = is_prime[1] = false;
+    for (int i = 2; i <= n; i++) {
+        if (is_prime[i]) {
+            prime[i] = i;
+            for (int j = 2 * i; j <= n; j += i) is_prime[i] = false;
+        }
+    }
+    return p;
+}
+```
+
+
+
+## 因数
+
+**贝祖定理**：如果a、b是整数，那么一定存在整数x、y使得ax+by=gcd(a,b)
+
+如果ax+by=1有解，那么gcd(a,b)=1
+
+（1）gcd(a,b) = gcd(a, ka+b)
+（2）gcd(ka, kb) = k·gcd(a, b)
+（3）定义多个整数的最大公约数：gcd(a, b, c) = gcd(gcd(a, b), c)
+（4）若gcd(a, b) = d，则gcd(a/d, b/d) = 1，即a/d与b/d互素。
+（5）**二元线性丢番图方程**ax+by=c有解的充分必要条件是d=gcd(a,b)能整除c，通解为：x=x0+(b/d)n，y=y0−(a/d)n
 
 ```c++
 //辗转相除法，递归开销大，要求a>=b
 int gcd(LL a, LL b) {
     return a % b == 0 ? b : gcd(b, a % b);
 }
+//扩展欧里几德，求解二元线性丢番图方程
+ll extgcd(ll a, ll b, ll& x, ll& y) {
+    ll d = 1;
+    if (b != 0) {
+        d = extgcd(b, a % b, y, x);
+        y -= (a / b) * x;
+    }
+    else {
+        x = 1; y = 0;
+    }
+    return d;
+}
+//最小公倍数
+int lcm(int a, int b){ 
+	return a / gcd(a, b) * b;
+}
+
 //更相减损法
 int qGCD(int a, int b)
 {
@@ -620,6 +730,72 @@ int qGCD(int a, int b)
 		return qGCD(a >> 1, b);
 	else
 		return qGCD(abs(a - b), min(a, b));
+}
+```
+
+## 质因数分解
+
+```c++
+int p[20];  //p[]记录因子，p[1]是最小因子。一个int数的质因子最多有10几个
+int c[40];  //c[i]记录第i个因子的个数。一个因子的个数最多有30几个
+//试除法
+void factorization(int n){
+    int m = 0;
+    for(int i = 2; i*i <= n; i++)
+        if(n%i == 0){
+           p[++m] = i, c[m] = 0;
+           while(n%i == 0)            //把n中重复的因子去掉
+              n/=i, c[m]++;    
+        }
+    if(n>1)                           //没有被除尽，是素数
+       p[++m] = n, c[m] = 1;  
+}
+
+```
+
+## 同余
+
+**一元线性同余方程**
+
+设x是未知数，给定a、b、m，求整数x，满足ax≡b(mod m)，等同于求解二元线性丢番图方程
+
+有解的充分必要条件是d=gcd(a,m)能整除b
+
+**逆**
+
+给定整数a，且满足gcd(a,m)=1，称 ax≡1(mod m)的一个解为a模m的逆。记为$a^{−1}$
+
+```c++
+//求逆
+//扩展欧几里得
+ll mod_inverse(ll a, ll m){    
+	ll x,y;
+    if(extgcd(a,m,x,y))
+    	return  (x % m + m) % m;                          //保证返回最小正整数
+    else return -1;
+}
+//费马小定理
+ll mod_inverse(ll a,ll mod){
+   return fast_pow(a,mod - 2,mod);           
+}
+```
+
+
+
+
+
+## 快速幂
+
+```c++
+//o(logn)，以x为底，n为指数，对mod取模的幂
+ll fast_pow(ll x, ll n, ll mod) {
+    ll res = 1;
+    while (n > 0) {
+        if (n & 1) res = res * x % mod;
+        x = x * x % mod;
+        n >>= 1;
+    }
+    return res;
 }
 ```
 
@@ -738,6 +914,7 @@ priority_queue<node> pq;
   #include<bits/stdc++.h>
   using namespace std;
   typedef long long ll;
+  typedef unsigned long long ull;
   constexpr int MOD = 1e9 + 7;
   constexpr int INF = 0x7fffffff;
   constexpr int MAX = 10000;
@@ -820,6 +997,7 @@ void print_permutation(序列A，集合S){
 + 一定要加上对特殊情况的判别，不但会提高正确率，还能减少Runtime（如开头加上对空参数的判别输出）
 + 大数组申请为全局变量
 + 即使是暴力枚举，也是要认真分析问题的，以减少枚举量
++ 最后答案要求取模时，前面每一步+-*之后都要取模再保存
 
 
 

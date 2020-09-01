@@ -38,7 +38,7 @@ int LIS_up() {//加入二分搜索,时间复杂度nlogn,
             dp[++length] = a[i];
             memcpy(finalLIS, dp, sizeof(int) * (length + 1));//储存LIS
         }
-        else //二分搜索找到小于a[i]的最大dp，替换
+        else //二分搜索找到大于a[i]的最小dp，替换
             *lower_bound(dp, dp + length + 1, a[i]) = a[i];
     }
     return length + 1;
