@@ -328,19 +328,19 @@ frame3.T
 
 + 可重复 
 
-| 方法            | 描述                                         |
-| --------------- | -------------------------------------------- |
-| append          | 将额外的索引对象粘贴到原索引，生成一个新索引 |
-| difference      | 差集                                         |
-| intersection,\| | 并集                                         |
-| union,&         | 交集                                         |
-| isin            | 表示每一个值是否在传值容器中的布尔数组       |
-| delete          | 按索引位删除                                 |
-| drop            | 按索引值删除                                 |
-| insert          | 按位插入                                     |
-| is_monotonic    | 是否递增                                     |
-| is_unique       | 是否唯一                                     |
-| unique          | 返回唯一值序列                               |
+| 方法         | 描述                                         |
+| ------------ | -------------------------------------------- |
+| append       | 将额外的索引对象粘贴到原索引，生成一个新索引 |
+| difference   | 差集                                         |
+| intersection | 并集                                         |
+| union,&      | 交集                                         |
+| isin         | 表示每一个值是否在传值容器中的布尔数组       |
+| delete       | 按索引位删除                                 |
+| drop         | 按索引值删除                                 |
+| insert       | 按位插入                                     |
+| is_monotonic | 是否递增                                     |
+| is_unique    | 是否唯一                                     |
+| unique       | 返回唯一值序列                               |
 
   
 
@@ -430,14 +430,46 @@ pd.concat([df3, df4], axis='col')
 | verify_integrity=True | 捕捉错误         |
 | ignore_index=True     | 创建新的整数索引 |
 | keys=['x', 'y']       | 多级索引         |
-|                       |                  |
-|                       |                  |
 
 
 
 # Mataplotlib
 
 <img src="./DataScience/anatomy.png" style="zoom: 80%;" />
+
+
+
+# 数据提取
+
+```python
+data = pandas.read_csv('data.csv')
+# 数据若干行
+print(data.head(3))
+# 数据基本统计
+print(data.describe())
+# 展示数据有几类
+data["Age"].unique()
+```
+
+**处理空缺值**
+
+```python
+# 使用中间值填充
+data["Age"] = data["Age"].fillna(data["Age"].median())
+```
+
+**数据编码**
+
+```python
+# 二值
+data['Sex'] = data['Sex'].apply(lambda r : 1 if r == "male" else 0)
+# 多值
+data['Embarked'] = data['Embarked'].apply(lambda r : 1 if r == "C" else r)
+data['Embarked'] = data['Embarked'].apply(lambda r : 2 if r == "S" else r)
+data['Embarked'] = data['Embarked'].apply(lambda r : 3 if r == "Q" else r)
+```
+
+
 
 
 
@@ -582,9 +614,234 @@ grid = tf.cast(grid, tf.float32)
 
 
 
-优化器
+## keras
+
+**Embedding**
+
+一种单词编码方法，以低维向量实现了编码，这种编码通过神经网络训练优化，能表达出单词的相关性
+
+```python
+tf.keras.layers.Embedding(词汇表大小，编码维度)
+# 编码维度就是用几个数字表达一个单词
+# 对1-100进行编码， [4] 编码为 [0.25, 0.1, 0.11]
+tf.keras.layers.Embedding(100, 3)
+
+# 使x_train符合Embedding输入要求：[送入样本数， 循环核时间展开步数] ，
+# 此处整个数据集送入所以送入，送入样本数为len(x_train)；输入4个字母出结果，循环核时间展开步数为4。
+x_train = np.reshape(x_train, (len(x_train), 4))
+y_train = np.array(y_train)
+
+model = tf.keras.Sequential([
+    Embedding(26, 2),
+    SimpleRNN(10),
+    Dense(26, activation='softmax')
+])
+```
 
 
+
+### 多层前馈神经网络
+
+六步法
+
+1. import
+2. train,test
+3. model = tf.keras.models.Sequential
+4. model.compile
+5. model.fit
+6. model.summary
+
+```python
+# 1
+import tensorflow as tf
+from sklearn import datasets
+import numpy as np
+
+# 2
+x_train = datasets.load_iris().data
+y_train = datasets.load_iris().target
+
+# 3
+model = tf.keras.models.Sequential([网络结构])
+# 网络结构
+# 拉直层
+tf.keras.layers.Flatten()
+# 全连接层
+# activation=relu,softmax,sigmoid,tanh
+# kernel_regularizer=tf.keras.regularizers.l1(),tf.keras.regularizers.l2()
+tf.keras.layers.Dense(神经元个数, activation='激活函数', kernel_regularizer=正则化)
+# 卷积层
+tf.keras.layers.Conv2D ()
+# LSTM层
+tf.keras.layers.LSTM()  
+
+# 4
+# optimizer=’sgd' or tf.keras.optimizers.SGD(lr=0.1)
+# loss='mse' or tf.keras.MeanSquaredError()
+# metrics='accuracy'都是数值 or 'categorical_accuracy'都是独热码 or ''sparse_categorical_accuracy'y_是数值y是独热码
+model.compile(optimizer=优化器, loss=损失函数, metrics=[数值和独热码])
+
+# 5
+model.fit(x_train, y_train, batch_size=32, epochs=500, validation_split=测试集比例, validation_freq=多少次epoch测试一次)
+# 6
+model.summary()
+```
+
+**自定义model**，代替Sequential
+
+```python
+from tensorflow.keras.layers import Dense
+from tensorflow.keras import Model
+class IrisModel(Model):
+    # 定义网络结构块
+    def __init__(self):
+        super(IrisModel, self).__init__()
+        self.d1 = Dense(3, activation='softmax', kernel_regularizer=tf.keras.regularizers.l2())
+    # 调用网络结构块，实现前向传播
+    def call(self, x):
+        y = self.d1(x)
+        return y
+
+model = IrisModel()
+```
+
+**数据增强**
+
+```python
+x_train = x_train.reshape(x_train.shape[0], 28, 28, 1)  # 给数据增加一个维度,从(60000, 28, 28)reshape为(60000, 28, 28, 1)
+
+image_gen_train = ImageDataGenerator(
+    rescale=1. / 1.,  # 如为图像，分母为255时，可归至0～1
+    rotation_range=45,  # 随机45度旋转
+    width_shift_range=.15,  # 宽度偏移
+    height_shift_range=.15,  # 高度偏移
+    horizontal_flip=False,  # 水平翻转
+    zoom_range=0.5  # 将图像随机缩放阈量50％
+)
+image_gen_train.fit(x_train)
+model.fit(image_gen_train.flow(x_train, y_train, batch_size=32), epochs=5, validation_data=(x_test, y_test),
+          validation_freq=1)
+```
+
+**断点续训**
+
+```python
+# 读取
+checkpoint_save_path = ".\checkpoint\fashion.ckpt"	#先定义出存放模型的路径和文件名，“.ckpt”文件在生成时会同步生成索引表
+if os.path.exists(checkpoint_save_path + '.index'):		#判断是否有索引表，就可以知道是否报存过模型
+    model.load_weights(checkpoint_save_path)
+# 保存
+cp_callback = tf.keras.callbacks.ModelCheckpoint(filepath=checkpoint_save_path,		# 文件存储路径
+                                                 save_weights_only=True,			# 是否只保留模型参数
+                                                 save_best_only=True)				# 是否只保留模型最优参数
+
+history = model.fit(x_train, y_train, batch_size=32, epochs=5, 						# 加入callbacks选项，记录到history中
+					validation_data=(x_test, y_test), validation_freq=1,
+                    callbacks=[cp_callback])
+# acc/loss
+acc = history.history['sparse_categorical_accuracy'] # 训练集准确率
+val_acc = history.history['val_sparse_categorical_accuracy'] # 测试集准确率
+loss = history.history['loss'] # 训练集loss
+val_loss = history.history['val_loss'] # 测试集loss
+
+```
+
+**参数提取**
+
+```python
+# 设置print输出格式
+np.set_printoptions(threshold=np.inf) # np.inf表示无限大
+# 提取参数
+print(model.trainable_variables)
+file = open('.\weights.txt', 'w')
+for v in model.trainable_variables:
+	file.write(str(v.name) + '\n')
+	file.write(str(v.shape) + '\n')
+	file.write(str(v.numpy()) + '\n')
+file.close()
+```
+
+**预测结果**
+
+```python
+# model = tf.keras.models.Sequential()
+# model.load_weights(model_save_path)
+# 预处理数据
+# 预测
+result = model.predict(x_predict)
+pred = tf.argmax(result, axis=1)
+```
+
+**数据集**
+
+```python
+mnist = tf.keras.datasets.mnist
+(x_train, y_train), (x_test, y_test) = mnist.load_data()
+cifar10 = tf.keras.datasets.cifar10
+```
+
+
+
+### 卷积神经网络
+
+```python
+# 卷积主结构
+model = tf.keras.models.Sequential([
+	Conv2D(filters=6, kernel_size=(5, 5), padding='same'),	#卷积层
+	BatchNormalization(),									#BN层	
+	Activation('relu'),										#激活层
+	MaxPool2D(pool_size=(2, 2), strides=2, padding='same'),	#池化层
+	Dropout(0.2),											#dropout层
+])
+# 卷积层
+tf.keras.layers.Conv2D (
+	filters = 卷积核个数,
+	kernel_size = 卷积核尺寸, 			#正方形写核长整数，或（核高h，核宽w）
+	strides = 滑动步长,					#横纵向相同写步长整数，或(纵向步长h，横向步长w)，默认1
+	padding = “same” or “valid”, 		#使用全零填充是“same”，不使用是“valid”（默认）
+	activation = “ relu ” or “ sigmoid ” or “ tanh ” or “ softmax”等 , 		#如有BN此处不写
+	input_shape = (高, 宽 , 通道数)		#输入特征图维度，可省略
+)
+# 批标准化
+tf.keras.layers.BatchNormalization()
+# 池化
+tf.keras.layers.MaxPool2D(
+	pool_size=池化核尺寸，	#正方形写核长整数，或（核高h，核宽w）
+	strides=池化步长，		#步长整数， 或(纵向步长h，横向步长w)，默认为pool_size
+	padding=‘valid’or‘same’ #使用全零填充是“same”，不使用是“valid”（默认）
+)
+tf.keras.layers.AveragePooling2D(
+	pool_size=池化核尺寸，	#正方形写核长整数，或（核高h，核宽w）
+	strides=池化步长，		#步长整数， 或(纵向步长h，横向步长w)，默认为pool_size
+	padding=‘valid’or‘same’ #使用全零填充是“same”，不使用是“valid”（默认）
+)
+# 舍弃
+tf.keras.layers.Dropout(舍弃的概率)
+```
+
+
+
+### 循环神经网络
+
+```python
+tf.keras.layers.SimpleRNN(记忆体个数，activation=‘激活函数’ ，return_sequences=是否每个时刻输出ht到下一层)
+# 参数
+	activation=‘激活函数’ （不写，默认使用tanh）
+	return_sequences=True 各时间步输出ht
+	return_sequences=False 仅最后时间步输出ht（默认）
+# 例：
+SimpleRNN(3, return_sequences=True)
+
+# RNN要求输入数据（x_train）的维度是三维的[送入样本数，循环核时间展开步数，每个时间步输入特征个数]
+# 此处整个数据集送入，送入样本数为len(x_train)；输入1个字母出结果，循环核时间展开步数为1; 表示为独热码有5个输入特征，每个时间步输入特征个数为5
+x_train = np.reshape(x_train, (len(x_train), 1, 5))
+y_train = np.array(y_train)
+
+model = tf.keras.Sequential([
+    SimpleRNN(3),
+    Dense(5, activation='softmax')
+])
+```
 
 
 

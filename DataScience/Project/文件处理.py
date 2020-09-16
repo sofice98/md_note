@@ -1,7 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
-
+from PIL import Image
 
 def file2matrix(filename):
     '''
@@ -27,3 +27,9 @@ def file2matrix(filename):
 
 # 读csv文件
 data = pd.read_csv(path)
+# 读入图片
+img = Image.open(img_path)  
+img = img.resize((28, 28), Image.ANTIALIAS) # 改变图片尺寸
+img = np.array(img.convert('L'))  # 图片变为8位宽灰度值的np.array格式
+img = img / 255.  # 数据归一化 （实现预处理）
+img_arr = 255 - img_arr # 反色

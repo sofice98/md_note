@@ -38,8 +38,8 @@ ax.plot(dataX, dataY, color="b", linewidth=1.0, linestyle="-")
 # 散点图
 ax.scatter(dataX, dataY)
 
-
-
+#绘制图片
+plt.imshow(x_train[0])
 
 
 
