@@ -548,6 +548,10 @@ int solve(int i, int j) {
 }
 ```
 
+**滚动数组**
+
+用到上一行的结果，从后向前滚动；用到本行的结果，从前向后滚动
+
 **经典动态规划问题**
 
 + 0/1背包
@@ -556,7 +560,13 @@ int solve(int i, int j) {
 
   可以用滚动数组，j需倒序计算，$dp[j] = max(dp[j], dp[j - w[i]] + v[i])$
 
-+ 硬币问题  
++ 完全背包
+
+  $dp[i][j]=max(dp[i-1][j],dp[i][j-w[i]]+v[i]$
+
+  可以用滚动数组，j正序计算，$dp[j] = max(dp[j], dp[j - w[i]] + v[i])$
+
++ 硬币问题 
 
   $dp[i][j] = min(dp[i - 1][j], dp[i][j - coins[i]] + 1)$
 
