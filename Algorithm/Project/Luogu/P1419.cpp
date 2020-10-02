@@ -3,7 +3,8 @@
 *Sofice
 *2020/8/4
 ***********/
-#include<bits/stdc++.h>
+#include<deque>
+#include<stdio.h> 
 using namespace std;
 typedef long long ll;
 const int MAX = 100010;

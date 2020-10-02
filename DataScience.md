@@ -20,6 +20,224 @@
 4. **LFW**：人脸数据集，包含13000+张图片和1680个不同的人。
 5. **CelebA**：人脸数据集，包含大约 20w 张图片，总共 10177个不同的人，以及每张图片都有 5 个位置标注点，40 个属性信息
 
+
+
+# 特征工程
+
+**数据处理八股**
+
+```python
+import re
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
+from scipy.special import boxcox1p
+from sklearn import preprocessing
+from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import train_test_split
+
+def DataAnalysis(data):
+    '''
+    数据分析
+    '''
+
+def ProcessData(train_df, test_df):
+    '''
+    预处理
+    '''
+    # 离群值
+    # 合并数据集
+    # 删除部分影响小的变量
+    # 缺失值
+    # 均值填充
+    # 检查有无缺失值
+    
+    return full_df, train_dfRow
+
+def FeatureEncoding(full_df):
+    '''
+    特征编码
+    '''
+
+def FeatureConstruction(full_df):
+    '''
+    特征构建
+    '''
+
+def FeatureScaling(full_df):
+    '''
+    特征缩放
+    '''    
+
+def FeatureSelection(data):
+    '''
+    特征选择
+    '''
+
+def FeatureEngineering(train_df, test_df):
+    '''
+    特征工程
+    '''
+    DataAnalysis(train_df)
+    full_df, train_dfRow = ProcessData(train_df, test_df)
+    FeatureEncoding(full_df)
+    FeatureConstruction(full_df)
+    FeatureScaling(full_df)
+    FeatureSelection(data)
+    return full_df, train_dfRow
+
+def TrainData(train_df):
+    '''
+    训练数据
+    '''
+    # 交叉验证
+    # 1.model1
+    # 网格搜索
+    # 正确率
+    # 2.model2
+    return model1, model2
+
+def Predict(model1, model2, test_df):
+    '''
+    预测数据
+    '''
+    #保存结果
+    predDf.to_csv('housePrice/out.csv', index=False)
+    
+
+if __name__ == "__main__":
+    ############ 1.读取数据
+    train_df = pd.read_csv('housePrice/train.csv')
+    test_df = pd.read_csv('housePrice/test.csv')
+    ############ 2.特征工程
+    full_df, train_dfRow = FeatureEngineering(train_df, test_df)
+    # one-hot编码
+    # 拆分
+    train_df = full_df[:train_dfRow]
+    test_df = full_df[train_dfRow:]
+    test_df.drop('SalePrice', axis=1, inplace=True)
+    ############ 3.训练数据
+    model1, model2 = TrainData(train_df)
+    ############ 4.预测数据
+    Predict(model1, model2, test_df)
+ 
+```
+
+**数据分析**
+
+```python
+data = pandas.read_csv('data.csv')
+# 数据若干行
+print(data.head(3))
+# 数据基本统计
+print(data.describe(include="all"))
+# 展示数据有几类
+data["Age"].unique()
+
+# 探索性可视化
+# 1.数据分布直方图与密度曲线
+sns.distplot(data['SalePrice'])
+# 计算偏度峰度
+print("Skewness: %f" % data['SalePrice'].skew())
+print("Kurtosis: %f" % data['SalePrice'].kurt())
+data['SalePrice'] = np.log(data['SalePrice'])
+# 2.数据散点图，连续型数据，观察趋势，去除离群点
+a = pd.concat([data['SalePrice'], data['GrLivArea']], axis=1)
+a.plot.scatter(x='GrLivArea', y='SalePrice', ylim=(0,800000))
+# 3.箱型图，离散型数据
+b = pd.concat([data['SalePrice'], data['OverallQual']], axis=1)
+fig = sns.boxplot(x='OverallQual', y='SalePrice', data=b)
+# 4.特征相关性
+corrmat = data.corr()
+sns.heatmap(corrmat, square=True, cmap='Blues')
+# 只展示其中最相关的10个特征
+cols = corrmat.nlargest(10, 'SalePrice')['SalePrice'].index
+cm = np.corrcoef(data[cols].values.T)
+hm = sns.heatmap(cm, cbar=True, annot=True, square=True, fmt='.2f', annot_kws={'size':10}, 
+                 xticklabels=cols.values, yticklabels=cols.values, cmap='Blues')
+# 列表
+print(corrmat['SalePrice'].sort_values(ascending =False))
+```
+
+**预处理**
+
+```python
+# 1.处理离群值，通过观察散点图和箱型图，直接删除
+train_df.drop(train_df[(train_df['TotalBsmtSF']>6000) & (train_df['SalePrice']<200000)].index,inplace=True)
+train_df.reset_index(drop=True, inplace=True)
+# 2.合并数据集
+full_df = train_df.append(test_df, ignore_index=True)
+# 删除部分影响小的变量
+full_df.drop(['Utilities', 'RoofMatl'], axis=1, inplace=True)
+# 3.处理缺失值值
+missing_count = full_df.isnull().sum().sort_values(ascending=False)
+missing_rate = (full_df.isnull().sum()/full_df.isnull().count()).sort_values(ascending=False)
+missing_df = pd.concat([missing_count, missing_rate], axis=1, keys=['count', 'rate'])
+print(missing_df[missing_df['rate']>0])
+# 缺失80% 以上直接删除
+full_df.drop(missing_df[missing_df['rate'] > 0.8].index, axis = 1, inplace=True)
+# 某些数值变量有缺失值是因为没有这个属性
+cols = ["FireplaceQu", "GarageQual"]
+for col in cols:
+    full_df[col] = full_df[col].fillna('None')
+# 使用均值，中位数或众数填充
+full_df[col] = full_df[col].fillna(full[col].mean())
+full_df[col] = full_df[col].fillna(full[col].median())
+full_df[col] = full_df[col].fillna(full[col].mode()[0])
+# 检查有无缺失值
+print(full_df.isnull().sum()[full_df.isnull().sum()>0])
+```
+
+**特征编码**
+
+```python
+# 离散化，一些特征其被表示成数值特征缺乏意义
+full_df['YearRemodAdd'] = full_df['YearRemodAdd'].astype(str)
+# 序号编码
+def OrdinalEncoding(df):
+    df['MSZoning'] = df['MSZoning'].map({'C':1, 'RM':2, 'RH':2, 'RL':3, 'FV':4})
+# 标签编码
+def LabelEncoding(df, col):
+    lab = preprocessing.LabelEncoder()
+    df[col] = df[col].astype(str)
+    df[col] = lab.fit_transform(df[col])
+# one-hot编码，通常在紧接训练之前
+full_df = pd.get_dummies(full_df)
+```
+
+**特征缩放**
+
+```python
+# 1.对数变换，解决右边有尾巴的偏度值
+train_df[col] = np.log1p(train_df[col])
+# 2.求偏度并进行boxcox变换
+from scipy.special import boxcox1p
+# 数据做一备份
+full_fe = full_df.copy()
+full_fe.drop(['SalePrice', 'Id'], axis=1, inplace=True)
+# 对于偏度大于0.75的量进行boxcox变换
+full_numeric = full_fe.select_dtypes(exclude='object')
+skew = full_numeric.apply(lambda x: x.skew()).sort_values(ascending=False)
+skew_features = skew[abs(skew) >= 0.75].index
+for feat in skew_features:
+    full_fe[feat] = boxcox1p(full_fe[feat], 0.15)
+# 3.标准化
+# [0,1]标准化
+scaler = preprocessing.MinMaxScaler()
+scaler.fit(data)
+data = scaler.transform(data)
+# 正态分布标准化
+scaler = preprocessing.StandardScaler()
+```
+
+
+
+
+
+
+
 # Numpy
 
 用于Python数值计算基础包
@@ -457,36 +675,6 @@ pd.concat([df3, df4], axis='col')
 
 
 
-# 数据提取
-
-```python
-data = pandas.read_csv('data.csv')
-# 数据若干行
-print(data.head(3))
-# 数据基本统计
-print(data.describe(include="all"))
-# 展示数据有几类
-data["Age"].unique()
-```
-
-**处理空缺值**
-
-```python
-# 使用中间值填充
-data["Age"] = data["Age"].fillna(data["Age"].median())
-```
-
-**数据编码**
-
-```python
-# 二值
-data['Sex'] = data['Sex'].apply(lambda r : 1 if r == "male" else 0)
-# 多值
-data['Embarked'] = data['Embarked'].apply(lambda r : 1 if r == "C" else r)
-data['Embarked'] = data['Embarked'].apply(lambda r : 2 if r == "S" else r)
-data['Embarked'] = data['Embarked'].apply(lambda r : 3 if r == "Q" else r)
-```
-
 
 
 
@@ -525,6 +713,33 @@ TensorFlow 支持以下三种类型的张量：
    tf.placeholder(dtype,shape=None,name=None)
    ```
    
+
+
+
+**屏蔽GPU加速**
+
+```python
+os.environ["CUDA_VISIBLE_DEVICES"]="-1"
+```
+
+
+
+## TensorBoard
+
+```python
+# 设定格式化模型名称，以时间戳作为标记
+model_name = "模型名-卷积".format()
+# 设定存储位置，每个模型不一样的路径
+tensorboard = TensorBoard(log_dir='logs/{}'.format(model_name))     
+TensorBoardcallback = keras.callbacks.TensorBoard(
+    log_dir='logs/{}'.format(model_name),
+    histogram_freq=1, batch_size=32,
+    write_graph=True, write_grads=False, write_images=True,
+    embeddings_freq=0, embeddings_layer_names=None,
+    embeddings_metadata=None, embeddings_data=None, update_freq=500
+)
+model.fit(x_train, y_train, callbacks=[tensorboard])
+```
 
 
 

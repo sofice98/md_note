@@ -600,6 +600,17 @@ int solve(int i, int j) {
 
 子串要连续，子序列不要求连续
 
+**分割字符串**，实现split
+
+```c++
+char* p1, * p2 = &s[0]; p2--;
+while(1){
+    p1 = ++p2;
+    for (char* b = p2; *b != ' ' && *b != '\0';b++) p2++;
+    string tmp(p1, p2);
+}
+```
+
 
 
 # 数论
