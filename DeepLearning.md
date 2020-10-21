@@ -4,6 +4,30 @@
 
 
 
+
+
+
+
+网络训练两大问题：
+
++ **梯度弥散/爆炸**
+
+  基于梯度的BP算法的优化，反向传播中，根据链式法则，前一层误差依赖于后一层误差。如果梯度逐渐消失，底层的参数不能有效更新，这也就是梯度弥散(或梯度消失)；反之会使得梯度以指数级速度增大，造成系统不稳定，也就是梯度爆炸问题
+
+  这个问题很大程度上已经被**标准初始化和中间层正规化方法**有效控制了，这些方法使得深度神经网络可以收敛
+
++ **网络退化问题**
+
+  在神经网络可以收敛的前提下，随着网络深度增加，网络的表现先是逐渐增加至饱和，然后迅速下降，这不是过拟合导致的。如果存在某个 K 层的网络 f 是当前最优的网络，那么可以构造一个更深的网络，其最后几层仅是该网络 f 第 K 层输出的恒等映射(Identity Mapping)，就可以取得与 f 一致的结果；也许 K 还不是所谓“最佳层数”，那么更深的网络就可以取得更好的结果。总而言之，与浅层网络相比，更深的网络的表现不应该更差。因此，一个合理的猜测就是，**对神经网络来说，恒等映射并不容易拟合**
+
+
+
+
+
+
+
+
+
 # 多层神经网络
 
 用于模式识别
@@ -22,6 +46,17 @@ $$
 
 每层神经元与下一层**全连接**，神经元不存在同层连接，也不存在跨层连接
 
+避免**过拟合**：
+
++ 早停：若训练集误差降低但验证机误差升高，则停止训练
++ 正则化：加上网络复杂度权重
+
+避免**局部极小**：
+
++ 多组初始值
++ 模拟退火法
++ 随机梯度下降
+
 ### 正向传播
 
 ![image-20200602195250519](\DeepLearning\正向传播.png)
@@ -33,9 +68,24 @@ $$
 反向传播误差进行自学习，自动调整权重
 
 梯度下降法求得误差对各传播路径的权重
-<img src="\DeepLearning\反向传播误差计算公式.png" alt="image-20200602195931523" style="zoom:200%;" />
-<img src="\DeepLearning\反向传播误差变量.png" alt="image-20200602200243371" style="zoom:200%;" />
-其中，△Wjk为权重改变量，α为学习率，Ek为输出误差，Ok为下一层输出，Oj上一层输出
+
+标准BP：累计BP = SGD：GD
+
+![image-20201019133631285](DeepLearning/BP算法.png)
+$$
+设\quad 隐层第h个单元的阈值为\,\gamma_h\quad 输出层第j个单元的阈值为\,\theta_j\\
+对于训练样例(x_k,y_k)，神经网络输出为\hat{y}_j^k=f(\beta_j-\theta_j)\quad 均方误差为E_k=\frac12\sum_{j=1}^l(\hat{y}_j^k-y_j^k)^2\\
+g_j=-\frac{\part E_k}{\part \hat{y}_j^k}\cdot\frac{\part \hat{y}_j^k}{\part \beta_j}=-\hat{y}_j^k(1-\hat{y}_j^k)(\hat{y}_j^k-y_j^k),\quad e_h=-\frac{\part E_k}{\part b_h}\cdot\frac{\part b_h}{\part \alpha_h}=b_h(1-b_h)\sum_{j=1}^lw_{hj}g_j\\
+\begin{cases} \Delta w_{hj}=\eta g_jb_h \\
+\Delta \theta_j=-\eta g_j \\
+\Delta v_{ih}=\eta e_hx_i \\
+\Delta \gamma_h=-\eta e_h \end{cases}
+$$
+
+
+
+
+
 
 
 
@@ -70,9 +120,8 @@ $\sum_{各层}(前层\times后层+后层)$
 
 + sigmoid函数
 
-  ![image-20200602195133779](\DeepLearning\S阈值函数公式.png)
-  <img src="\DeepLearning\S阈值函数.png" alt="image-20200602194935171" style="zoom: 80%;" />
-
+  ![image-20200602195133779](\DeepLearning\S阈值函数公式.png)<img src="\DeepLearning\S阈值函数.png" alt="image-20200602194935171" style="zoom: 80%;" /> ${f}'(x)=f(x)(1-f(x))$
+  
 + tanh函数
 
 + relu函数

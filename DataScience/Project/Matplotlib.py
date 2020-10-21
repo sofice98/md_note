@@ -5,9 +5,11 @@ import numpy as np
 dataX=np.linspace(-6,6,256)
 dataY=np.sin(dataX)
 # 总画布，设置point和分辨率
-fig = plt.figure(figsize=(10,5), dpi=80)
+fig = plt.figure(figsize=(15,7), dpi=80)
 # axes子图
 ax = fig.add_subplot(111)
+# 等价于
+fig, ax = plt.subplots(1,1,figsize=(15,7), dpi=80)
 
 # 标题
 ax.set_title('Title',fontsize=18)

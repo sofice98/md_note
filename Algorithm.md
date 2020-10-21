@@ -585,6 +585,10 @@ int solve(int i, int j) {
 + 编辑距离
 
   $dp[i][j] = dp[i - 1][j - 1] + 1，\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad\quad s1[i] = s2[j]\\dp[i][j] = min(dp[i][j - 1], dp[i - 1][j], dp[i - 1][j-1])+1，s1[i] \not= s2[j]$
+  
++ 斐波那契数列
+
+  可以不使用dp，只用prev2，prev1，cur三个变量
 
 
 
