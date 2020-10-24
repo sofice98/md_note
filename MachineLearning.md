@@ -318,7 +318,13 @@ $$
 
   - 夹角余弦
 
+- 前向分步算法
 
+  为得到加法模型：$f(x)=\sum_{m=1}^M\beta_mb(x;\gamma_m)$，需要求解损失函数极小化问题：$min_{\beta_m,\gamma_m}\sum_{i=1}^NL(y_i,\sum_{m=1}^M\beta_mb(x;\gamma_m))$，前向分步算法将同时求解$m=1 toM$所有参数问题简化为逐次求解各个$\beta_m,\gamma_m$
+
+  1. 初始化$f_0(x)=0$
+  2. 对于$m=1,2,...,M$，$(\beta_m,\gamma_m)=argmin_{\beta,\gamma}\sum_{i=1}^NL(y_i,f_{m-1}(x_i)+\beta b(x;\gamma)),\quad f_m(x)=f_{m-1}(x)+\beta_m b(x;\gamma_m))$
+  3. 得到加法模型：$f(x)=f_M(x)=\sum_{m=1}^M\beta_mb(x;\gamma_m)$
 
 
 
@@ -917,7 +923,15 @@ dtProb = dtModel.predict_proba(testData[features])[:, 1]
 
   3. 构建基本分类器的线性组合：$G(x)=sign(\sum_{m=1}^M\alpha_mG_m(x))$
 
-  ​     
+  AdaBoost算法可看作**前向分步算法的特例**，损失函数是指数函数     
+
+  
+
++ **提升树（boosting tree）**  
+
+  基函数为决策树 $T(x;\Theta_m)$ 的加法模型：$f(x)=\sum_{m=1}^MT(x;\Theta_m),\quad \hat\Theta_m=argmin_{\Theta_m}\sum_{i=1}^NL(y_i,f_{m-1}(x_i)+T(x_i;\Theta_m))$
+
+  分类：指数损失函数，变为Adaboost算法的特例；回归：平方误差损失函数
 
   
 
