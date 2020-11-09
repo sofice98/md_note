@@ -204,6 +204,17 @@ print(scores.mean())
 
 泛化误差（generalization error）等于模型对未知数据预测的误差期望，使用**泛化误差上界**来判断学习算法的优劣
 
+
+
+**超参数调优**
+
+```python
+# 网格搜索
+from sklearn.model_selection import GridSearchCV
+```
+
+
+
 # 数学
 
 + **梯度下降法**
@@ -1033,6 +1044,44 @@ dtProb = dtModel.predict_proba(testData[features])[:, 1]
 + **XGBoost**
 
   
+  
+  
+  
+  ```python
+  import xgboost as xgb
+  # data
+  xgb_train = xgb.DMatrix(X_train,y_train)
+  xgb_test = xgb.DMatrix(X_test,y_test)
+  # fit
+  params = {
+      'objective':'multi:softmax',# 学习目标，二分类binary:logistic，平方误差回归reg:squarederror，多分类multi:softmax
+      'booster':'gbtree',# 子模型，gbtree, gblinear or dart
+      'eta':0.1,# 学习率
+      'max_depth':5,
+      'num_class':3,# 标签类别数
+  }
+  watchlist = [(xgb_train,'train'),(xgb_test,'test')]
+  model = xgb.train(params, xgb_train, num_boost_round=10, evals=watchlist)
+  model.save_model('./model.xgb')
+  # predict
+  bst = xgb.Booster()
+  bst.load_model('./model.xgb')
+  pred = bst.predict(xgb_test)
+  # 基于历史预测值继续训练
+  pred_train = model.predict(xgb_train,output_margin=True)
+  pred_test = model.predict(xgb_test,output_margin=True)
+  xgb_train.set_base_margin(pred_train)
+  xgb_test.set_base_margin(pred_test)
+  # 导出模型文件
+  bst.dump_model('./xgb_model_dump.txt')
+  # k折交叉验证
+  res = xgb.cv(params, xgb_train, 50, nfold=5, seed=0, 
+  callbacks=[xgb.callback.print_evaluation(show_stdv=False), xgb.callback.early_stop(5)])
+  ```
+  
+  
+  
+  
 
 ## Bagging方法（Bootstrap Aggregating）
 
@@ -1118,9 +1167,15 @@ plt.show()
 
 ## 朴素贝叶斯
 
+- **朴素贝叶斯法**：基于贝叶斯定理与特征条件独立假设的分类方法（先根据独立条件求联合分布，再利用贝叶斯定理求出后验概率最大输出y）。先根据样本求得先验概率和标签概率，再使用极大似然估计或者贝叶斯估计，求得各个后验概率值，取最大概率作为估计值。最大化后验概率等价于期望风险最小化。
+
+- **贝叶斯估计**：贝叶斯学派，认为估计参数有一个概率分布，
+
+- **最大似然估计**：频率学派，认为估计参数为定值，通过最大化概率密度函数，求得估计值
+
 **naive Bayes assumption**：假设各特征相互独立：$P(x_1,x_2,...,x_n|y)=\prod_{i=1}^nP(x_i|y)$ ，越独立效果越好
 
-先根据样本求得先验概率和标签概率，再使用极大似然估计或者贝叶斯估计，求得各个后验概率值，取最大概率作为估计值
+
 
 包含：伯努利模型，多项式模型，高斯模型
 
@@ -1128,11 +1183,12 @@ plt.show()
 
 + **伯努利模型**
 
-  $P(x_i=1|y)=p_{i,y};P(x_i=0|y)=1-p_{i,y}$ 
+  $p(c_i|\vec{w})=\cfrac{p(\vec{w}|c_i)p(c_i)}{p(\vec{w})},\quad c_i为类别i,\quad \vec{w}为特征向量$
 
-  多元伯努利模型的变量y的分布概率$\hat{\theta_l}$等于各类别在训练数据中的占比，每个字的条件概率$\hat{p_{j,l}}$等于这个字在这个类别里出现的比例
+  多元伯努利模型的变量 y 的分布概率等于各类别在训练数据中的占比，每个字的条件概率等于这个字在这个类别里出现的比例
 
-  训练集没有出现过的字没办法预测，这时可加入**平滑项**，将$\hat{p_{j,l}}$的计算公式分母上加$2\alpha$，分子上加$\alpha$（平滑系数） 
+  - 训练集没有出现过的字没办法预测，这时可加入**平滑项**，将$\cfrac{p(\vec{w}|c_i)}{p(\vec{w})}$的计算公式分母上加$2\alpha$，分子上加$\alpha$（平滑系数） 
+  - 为避免连乘导致的下溢出或浮点数舍入错误，再加一层取对数
 
 + **多项式模型**
 
@@ -1747,7 +1803,7 @@ Skewness<0 负偏差数值较大，为负偏或左偏。长尾巴拖在左边
 
 1. **词袋模型**
 
-   将整段文本以词为单位切分开，然后每篇文章可以表示成一个长向量，向量的每一个维度代表一个单词，而该维度的权重反映了该单词在原来文章中的重要程度
+   将整段文本以词为单位切分开，然后每篇文章可以表示成一个长向量，向量的每一个维度代表一个单词出现的频率，而该维度的权重反映了该单词在原来文章中的重要程度
 
    通常采用 **TF-IDF** 计算权重： $TF-IDF(t, d) = TF(t,d) × IDF(t)$
 

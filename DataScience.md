@@ -5,12 +5,29 @@
 常用的可以查找数据集的网站以及一些在计算机视觉常用的图像数据集：
 
 1. **Kaggle 数据集**:每个数据集都是一个小型社区，用户可以在其中讨论数据、查找公共代码或在内核中创建自己的项目。包含各式各样的真实数据集。
+
 2. **Amazon 数据集**：该数据源包含多个不同领域的数据集，如：公共交通、生态资源、卫星图像等。网页中也有一个搜索框来帮助用户寻找想要的数据集，还有所有数据集的描述和使用示例，这些数据集信息丰富且易于使用！
+
 3. **UCI机器学习资源库**：来自加州大学信息与计算机科学学院的大型资源库，包含100多个数据集。用户可以找到单变量和多变量时间序列数据集，分类、回归或推荐系统的数据集。
+
 4. **谷歌数据集搜索引擎**：这是一个可以按名称搜索数据集的工具箱。
+
 5. **微软数据集**：2018年7月，微软与外部研究社区共同宣布推出“Microsoft Research Open Data”。它在云中包含一个数据存储库，用于促进全球研究社区之间的协作。它提供了一系列用于已发表研究的、经过处理的数据集。
+
 6. **Awesome Public Datasets Collection**：Github 上的一个按“主题”组织的数据集，比如生物学、经济学、教育学等。大多数数据集都是免费的，但是在使用任何数据集之前，用户需要检查一下许可要求。
+
 7. **计算机视觉数据集**：Visual Data包含一些可以用来构建计算机视觉(CV)模型的大型数据集。用户可以通过特定的CV主题查找特定的数据集，如语义分割、图像标题、图像生成，甚至可以通过解决方案(自动驾驶汽车数据集)查找特定的数据集。
+
+8. **Scikit-Learn：**
+
+   ```python
+   from sklearn.datasets import load_iris
+   data = load_iris()
+   X = data.data
+   Y = data.target
+   ```
+
+   
 
 常用的部分图像数据集：
 
@@ -86,25 +103,28 @@ def FeatureEngineering(train_df, test_df):
     FeatureConstruction(full_df)
     FeatureScaling(full_df)
     FeatureSelection(data)
-    return full_df, train_dfRow
+    # 拆分
+    train_df = full_df[:train_dfRow]
+    test_df = full_df[train_dfRow:]
+    test_df.drop('SalePrice', axis=1, inplace=True)
+    return train_df, test_df
 
 def TrainData(train_df):
     '''
     训练数据
     '''
     # 交叉验证
-    # 1.model1
+    # model
     # 网格搜索
     # 正确率
-    # 2.model2
-    return model1, model2
+    return model
 
-def Predict(model1, model2, test_df):
+def Predict(model, test_df):
     '''
     预测数据
     '''
     #保存结果
-    predDf.to_csv('housePrice/out.csv', index=False)
+    predDf.to_csv('housePrice/out.csv', index=False, header=False)
     
 
 if __name__ == "__main__":
@@ -112,29 +132,25 @@ if __name__ == "__main__":
     train_df = pd.read_csv('housePrice/train.csv')
     test_df = pd.read_csv('housePrice/test.csv')
     ############ 2.特征工程
-    full_df, train_dfRow = FeatureEngineering(train_df, test_df)
-    # one-hot编码
-    # 拆分
-    train_df = full_df[:train_dfRow]
-    test_df = full_df[train_dfRow:]
-    test_df.drop('SalePrice', axis=1, inplace=True)
+    train_df, test_df = FeatureEngineering(train_df, test_df)
     ############ 3.训练数据
-    model1, model2 = TrainData(train_df)
+    model = TrainData(train_df)
     ############ 4.预测数据
-    Predict(model1, model2, test_df)
+    Predict(model, test_df)
  
 ```
 
 **数据分析**
 
 ```python
-data = pandas.read_csv('data.csv')
+data = pandas.read_csv('data.csv', keep_default_na=False)
 # 数据若干行
 print(data.head(3))
 # 数据基本统计
 print(data.describe(include="all"))
 # 展示数据有几类
-data["Age"].unique()
+print(data["Age"].unique())
+data['label'].value_counts()
 
 # 探索性可视化
 # 1.数据分布直方图与密度曲线
@@ -168,6 +184,7 @@ print(corrmat['SalePrice'].sort_values(ascending =False))
 train_df.drop(train_df[(train_df['TotalBsmtSF']>6000) & (train_df['SalePrice']<200000)].index,inplace=True)
 train_df.reset_index(drop=True, inplace=True)
 # 2.合并数据集
+train_dfRow = train_df.shape[0]
 full_df = train_df.append(test_df, ignore_index=True)
 # 删除部分影响小的变量
 full_df.drop(['Utilities', 'RoofMatl'], axis=1, inplace=True)
@@ -203,8 +220,24 @@ def LabelEncoding(df, col):
     lab = preprocessing.LabelEncoder()
     df[col] = df[col].astype(str)
     df[col] = lab.fit_transform(df[col])
-# one-hot编码，通常在紧接训练之前
+# one-hot编码（通常在紧接训练之前）
 full_df = pd.get_dummies(full_df)
+# 自定义columns名称
+weekdaycols = ['weekday_' + str(i) for i in range(1,8)]
+tmpdf = pd.get_dummies(df['weekday'].replace('null', np.nan))
+tmpdf.columns = weekdaycols
+df[weekdaycols] = tmpdf
+# 改变类型
+data['distance'] = data['Distance'].replace('null', -1).astype(int)
+# 日期变为周几, eg. 20201104 -> 4
+def getWeekday(row):
+    if row == 'null':
+        return row
+    else:
+        return date(int(row[0:4]), int(row[4:6]), int(row[6:8])).weekday() + 1
+df['weekday'] = df['Date'].astype(str).apply(getWeekday)
+# 周内还是周末
+df['weekday_type'] = df['weekday'].apply(lambda x: 1 if x in [6,7] else 0)
 ```
 
 **特征缩放**

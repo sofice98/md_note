@@ -44,9 +44,38 @@ https://www.microsoft.com/zh-cn/software-download/windows10
 
 
 
+# vscode
+
+## 插件
+
+Chinese
+
+python
+
+vscode-icons
+
+Bracket Pair Colorizer 2
 
 
 
+# Anaconda
+
+## pip修改国内镜像
+
+windows下，直接在user目录中创建一个pip目录，如：C:\Users\xx\pip，新建文件pip.ini，内容如下
+
+```
+ [global]
+ index-url = https://pypi.tuna.tsinghua.edu.cn/simple
+```
+
+## Tensorflow-gpu安装
+
+tensorflow_gpu-2.3.1
+
+cuda10.1
+
+cudnn7.6
 
 
 

@@ -27,6 +27,8 @@ def file2matrix(filename):
 
 # 读csv文件
 data = pd.read_csv(path)
+# 写csv文件
+data.to_csv("titanic/out.csv", index = False)
 # 读入图片
 img = Image.open(img_path)  
 img = img.resize((28, 28), Image.ANTIALIAS) # 改变图片尺寸
