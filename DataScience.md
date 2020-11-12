@@ -49,9 +49,11 @@ import re
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+pd.set_option('max_columns', 100)
+pd.set_option('max_rows', 100)
 import seaborn as sns
 from scipy.special import boxcox1p
-from sklearn import preprocessing
+from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import cross_val_score
 from sklearn.model_selection import train_test_split
 
@@ -150,7 +152,7 @@ print(data.head(3))
 print(data.describe(include="all"))
 # 展示数据有几类
 print(data["Age"].unique())
-data['label'].value_counts()
+print(data['label'].value_counts())
 
 # 探索性可视化
 # 1.数据分布直方图与密度曲线
@@ -216,10 +218,8 @@ full_df['YearRemodAdd'] = full_df['YearRemodAdd'].astype(str)
 def OrdinalEncoding(df):
     df['MSZoning'] = df['MSZoning'].map({'C':1, 'RM':2, 'RH':2, 'RL':3, 'FV':4})
 # 标签编码
-def LabelEncoding(df, col):
-    lab = preprocessing.LabelEncoder()
-    df[col] = df[col].astype(str)
-    df[col] = lab.fit_transform(df[col])
+le = LabelEncoder()
+train['QUEUE_TYPE'] = le.fit_transform(train['QUEUE_TYPE'].astype(str))
 # one-hot编码（通常在紧接训练之前）
 full_df = pd.get_dummies(full_df)
 # 自定义columns名称
@@ -585,6 +585,12 @@ frame2['debt'] = val
 del frame2['eastern']
 # 转置
 frame3.T
+# 排序
+data = data.sort_values(by=['x1', 'x2'])
+# 重置索引
+data = data.reset_index(drop=True)
+# 聚合
+data.groupby('x1')
 ```
 
 

@@ -25,3 +25,11 @@ if __name__ == '__main__':
 
 
 append会原封不动的push_back，extend会迭代与原 list 相同维度进行push_back
+
+
+
+```python
+# 浮点range
+from floatrange import floatrange
+```
+

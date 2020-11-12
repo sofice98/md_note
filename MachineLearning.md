@@ -211,6 +211,11 @@ print(scores.mean())
 ```python
 # 网格搜索
 from sklearn.model_selection import GridSearchCV
+clf = GridSearchCV(model,{
+    'max_depth':range(2,6),
+    'n_estimators':[20,50,70],
+    'learning_rate':list(floatrange(0.1,1.1,0.1)),
+})
 ```
 
 
@@ -1056,7 +1061,7 @@ dtProb = dtModel.predict_proba(testData[features])[:, 1]
   params = {
       'objective':'multi:softmax',# 学习目标，二分类binary:logistic，平方误差回归reg:squarederror，多分类multi:softmax
       'booster':'gbtree',# 子模型，gbtree, gblinear or dart
-      'eta':0.1,# 学习率
+      'learning_rate':0.1,# 学习率
       'max_depth':5,
       'num_class':3,# 标签类别数
   }
@@ -1077,6 +1082,17 @@ dtProb = dtModel.predict_proba(testData[features])[:, 1]
   # k折交叉验证
   res = xgb.cv(params, xgb_train, 50, nfold=5, seed=0, 
   callbacks=[xgb.callback.print_evaluation(show_stdv=False), xgb.callback.early_stop(5)])
+  
+  # scikit-learn API
+  model = xgb.XGBRegressor()
+  clf = GridSearchCV(model,{
+      'objective':'reg:squarederror',
+      'max_depth':range(2,3),
+      'n_estimators':[20,50,70],
+      'learning_rate':[0.05, 0.1, 0.2],
+  }, n_jobs=-1)
+  clf.fit(train_df[feature_names], train_df[label_names], 
+          early_stopping_rounds=10, eval_metric="auc", eval_set=[(train_df[feature_names], train_df[label_names])])
   ```
   
   
@@ -1168,14 +1184,16 @@ plt.show()
 ## 朴素贝叶斯
 
 - **朴素贝叶斯法**：基于贝叶斯定理与特征条件独立假设的分类方法（先根据独立条件求联合分布，再利用贝叶斯定理求出后验概率最大输出y）。先根据样本求得先验概率和标签概率，再使用极大似然估计或者贝叶斯估计，求得各个后验概率值，取最大概率作为估计值。最大化后验概率等价于期望风险最小化。
+- **最大似然估计**：频率学派，认为估计参数为定值，通过最大化概率密度函数，求得估计值.
+- **贝叶斯估计**：贝叶斯学派，认为估计参数有一个概率分布，会加上平滑
 
-- **贝叶斯估计**：贝叶斯学派，认为估计参数有一个概率分布，
+**naive Bayes assumption**：假设各特征相互独立：$P(X_1=x_1,X_2=x_2,...,X_n=x_n|y=c_k)=\prod_{i=1}^nP(X_i=x_i|y=c_k)$ ，越独立效果越好
 
-- **最大似然估计**：频率学派，认为估计参数为定值，通过最大化概率密度函数，求得估计值
+**贝叶斯定理**：$p(y=c_k|X=x)=p(X=x|y=c_k)$
 
-**naive Bayes assumption**：假设各特征相互独立：$P(x_1,x_2,...,x_n|y)=\prod_{i=1}^nP(x_i|y)$ ，越独立效果越好
+**加上拉普拉斯平滑**：$p(y=c_k)=\cfrac{\sum_{i=1}^NI(y=c_k)+\lambda}{N+K\lambda},\quad p(X_i=x_j|y=c_k)=\cfrac{\sum_{i=1}^NI(X_i=x_i,y=c_k)+\lambda}{\sum_{i=1}^NI(y=c_k)+S_i\lambda}$，其中$K$为 $y$ 的类别数，$S_j$为$X_i$的类别数
 
-
+NLP
 
 包含：伯努利模型，多项式模型，高斯模型
 
@@ -1990,10 +2008,32 @@ Skewness<0 负偏差数值较大，为负偏或左偏。长尾巴拖在左边
   4. 重复直到误分类率小于阈值即可得到最终分类器
 
 
+- **朴素贝叶斯**
 
+  使用带有拉普拉斯平滑的贝叶斯公式
 
+  $p(y=-1)=\cfrac{7}{17},\quad p(y=-1)=\cfrac{10}{17}$
 
+  | $p(A(i)=i|y=i)$ | $y = - 1$      | $y = 1$         |
+  | --------------- | -------------- | --------------- |
+  | A1=1            | $\cfrac{5}{9}$ | $\cfrac{3}{12}$ |
+  | A1=2            | $\cfrac{2}{9}$ | $\cfrac{4}{12}$ |
+  | A1=3            | $\cfrac{2}{9}$ | $\cfrac{5}{12}$ |
+  | A2=0            | $\cfrac{7}{8}$ | $\cfrac{5}{11}$ |
+  | A2=1            | $\cfrac{1}{8}$ | $\cfrac{6}{11}$ |
+  | A3=0            | $\cfrac{7}{8}$ | $\cfrac{4}{11}$ |
+  | A3=1            | $\cfrac{1}{8}$ | $\cfrac{7}{11}$ |
+  | A4=1            | $\cfrac{4}{9}$ | $\cfrac{3}{12}$ |
+  | A4=2            | $\cfrac{4}{9}$ | $\cfrac{4}{12}$ |
+  | A4=3            | $\cfrac{1}{9}$ | $\cfrac{5}{12}$ |
 
+  给定样本：$x(A1=1,A2=0,A3=0,A4=3)$
+
+  $p(y=-1)p(A1=1|y=-1)p(A2=0|y=-1)p(A3=0|y=-1)p(A4=3|y=-1)=0.01946$
+
+  $p(y=1)p(A1=1|y=1)p(A2=0|y=1)p(A3=0|y=1)p(A4=3|y=1)=0.01013$
+
+  因此取$y=-1$
 
 ## 回归
 
