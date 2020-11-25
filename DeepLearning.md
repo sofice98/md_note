@@ -42,6 +42,22 @@ $$
 $$
 `self.wih = numpy.random.normal(0.0, pow(self.inodes, -0.5), (self.hnodes, self.inodes))`
 
+
+
+**Hebb学习规则**
+
+无监督，在同一时间被激发的神经元间的联系会被强化。
+
+$w_{ij}(t+1)=w_{ij}(t)+\eta y_iy_j$，$w_{ij}$为神经元 i j 之间的连接权重，$y_i,y_j\in\{-1,1\}$为神经元输出。同时激活或同时抑制会增加权重
+
+**Delta学习规则**
+
+有监督，根据神经元的实际输出与期望输出差别来调整连接权。
+
+$w_{ij}(t+1)=w_{ij}(t)+\eta (d_i-y_i)x_j(t)$，$d_i$为第 i 个神经元的期望输出，$y_i$为第 i 个神经元的实际输出，$x_j$为第 j 个神经元的状态。若神经元实际输出比期望输出大，则减少输入为正的连接的权重，增大所有输入为负的连接的权重。反之，则增大所有输入为正的连接权的权重，减少所有输入为负的连接权的权重。
+
+
+
 ## 多层前馈神经网络
 
 每层神经元与下一层**全连接**，神经元不存在同层连接，也不存在跨层连接
@@ -79,7 +95,7 @@ g_j=-\frac{\part E_k}{\part \hat{y}_j^k}\cdot\frac{\part \hat{y}_j^k}{\part \bet
 \begin{cases} \Delta w_{hj}=\eta g_jb_h \\
 \Delta \theta_j=-\eta g_j \\
 \Delta v_{ih}=\eta e_hx_i \\
-\Delta \gamma_h=-\eta e_h \end{cases}
+\Delta \gamma_h=-\eta e_h \end{cases}
 $$
 
 
@@ -182,6 +198,8 @@ $\sum_{各层}(前层\times后层+后层)$
   卷积输出特征图在原始图像上的映射区域大小
 
 + **全零填充**
+
+  保证输出与输入尺度相同
 
   填充`padding='SAME'`：$输出=\lceil输入/步长\rceil$
   不填充`padding='VALID'`： $输出=\lceil输入-核长+1/步长\rceil$

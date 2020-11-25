@@ -869,6 +869,34 @@ void generate_subset(int n) {
 
 
 
+## 位图
+
+可用一个n位长的bool串表示一个所有元素都小于n的简单非负整数集合
+
+从而方便排序等操作
+
+```c++
+//使用为逻辑运算来实现位向量
+#define BITSPERWORD 32//一个int元素代表32位
+#define  SHIFT 5//计算商
+#define MASK 0x1F//计算余数
+#define N 10000000//位数不超过10000000
+int a[1 + N/BITSPERWORD];//计算需要多少个int
+void set(int i){
+	a[i>>SHIFT] |= (1<<(i & MASK));
+}
+void clr(int i){
+	a[i>>SHIFT] &= ~(1<<(i & MASK));
+}
+int test(int i){
+	return a[i>>SHIFT] & (1<<(i & MASK));
+}
+```
+
+
+
+
+
 
 
 # 排序
