@@ -81,7 +81,11 @@ cudnn7.6
 
 
 
+# csgo
 
+steam管理员启动，csgo不要管理员启动
+
+闪退：管理员进入cmd窗口后输入netsh winsock reset，然后重启
 
 
 
