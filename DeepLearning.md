@@ -292,6 +292,22 @@ $\sum_{各层}(前层\times后层+后层)$
 
 
 
+## 长短期记忆网络(LSTM)
+
+
+
+## (GRU)
+
+
+
+## 双向RNN(BiRNN)
+
+
+
+
+
+
+
 
 
 # 相互连接型神经网络
@@ -430,23 +446,63 @@ v和h的联合概率：<img src="DeepLearning/RBM联合概率.png" alt="img" sty
 
 
 
+# Encoder-Decoder
+
+一种End-to-End学习的算法
+
+<img src="DeepLearning\encoder-decoder.png" alt="image-20201208154602361" style="zoom: 80%;" />
+
+**Seqe2Seq：**
+
+<img src="DeepLearning\seq2seq.png" alt="image-20201208155520385" style="zoom:80%;" />
+
+encoder部分是将输入序列表示成一个带有语义的向量，decoder部分是以encoder生成的hidden state vector作为输入“解码”出目标文本序列
+
+
+
+基本的Encoder-Decoder模型**局限性**：编码器要将整个序列的信息压缩进一个固定长度的向量中去，编码和解码之间的唯一联系就是一个固定长度的语义向量c，导致：
+
+- 语义向量无法完全表示整个序列的信息
+- 先输入的内容携带的信息会被后输入的信息稀释掉
 
 
 
 
 
+# Attention
+
+https://www.jianshu.com/p/9b922fb83d77
+
+https://blog.csdn.net/qq_40027052/article/details/78421155
+
+为了解决基本的Encoder-Decoder模型的局限性，在产生输出的时候，还会产生一个“注意力范围”，表示接下来输出的时候要重点关注输入序列中的哪些部分，然后根据关注的区域来产生下一个输出
+
+<img src="DeepLearning\attention.png" alt="image-20201208160208989" style="zoom:67%;" />
+
+**BiRNN+Attention：**
+
+![image-20201208164624296](DeepLearning\attention1.png)
 
 
+$$
+条件概率：\quad p(y_i|y_1,...,y_{i-1},X)=g(y_{i-1},s_i,c_i)\\
+decoder\,中RNN在\,i\,时刻的隐状态：\quad s_i=f(s_{i-1},y_i-1,c_i)\\
+内容向量由隐状态序列加权得到\quad c_i=\sum_{j=1}^{T_x}\alpha_{ij}h_j\\
+encoder\,端的第\,j\,个词与\,decoder\,端的第i个词之间的权值，表示源端第\,j\,个词对目标端第\,i\,个词的影响程度：\\
+由i-1时刻的目标端隐状态和所有源端隐状态得到：\quad \alpha_{ij}=\cfrac{exp(e_{ij})}{\sum_{k=1}^{T_x}exp(e_{ij})}\\
+对齐模型：\quad e_{ij}=a(s_{i-1},h_j)\\
+$$
+**Soft Attention 和Hard Attention：**
 
+- Soft Attention：参数化，可导，可进行梯度反向传播，能被嵌入到模型中去，直接训练
+- Hard Attention：随机过程，依概率Si来采样输入端的隐状态一部分来进行计算，而不是整个encoder的隐状态，需要采用蒙特卡洛采样的方法来估计模块的梯度
 
+**Global Attention 和 Local Attention：**
 
+- Global Attention：
+- Local Attention：
 
-
-
-
-
-
-
+Self Attention：
 
 
 
