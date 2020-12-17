@@ -65,7 +65,7 @@
 
 **模型持久化**
 
-![image-20200604224059670](.\MachineLearning\模型持久化.png)
+![image-20200604224059670](..\模型持久化.png)
 
 python-python：内置库pickle
 
@@ -158,11 +158,11 @@ for train_idx, validate_idx in kf:
 
 + 过拟合：模型灵活性高，方差高，模型在验证集的表现远远不如在训练集的表现——数据清洗，增大训练集，增多正则化项
 
-<img src=".\MachineLearning\验证曲线示意图.png" style="zoom: 80%;" />
+<img src="..\验证曲线示意图.png" style="zoom: 80%;" />
 
 **评估模型结果**
 
-![image-20200611141531731](.\MachineLearning\数据预测分类.png)
+![image-20200611141531731](..\数据预测分类.png)
 
 + **查准率**：$Precision=\cfrac{TP}{TP+FP}$ 表示预测为正的样例中有多少是真正的正样例
 
@@ -180,7 +180,7 @@ for train_idx, validate_idx in kf:
   - 设置不同阈值参数可得到一个点，连起来就是ROC曲线。曲线下方阴影面积为AUC，代表模型预测正确的概率，不依赖于阈值，取决于模型本身
   - 当测试集中的正负样本的分布变换（**类别不平衡**）的时候，ROC曲线能够保持不变
 
-  ![image-20200611150737627](.\MachineLearning\ROC.png)
+  ![image-20200611150737627](..\ROC.png)
   
   ```python
   from sklearn.metrics import roc_curve, auc

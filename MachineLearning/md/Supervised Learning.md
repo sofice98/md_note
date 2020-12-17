@@ -16,7 +16,7 @@
 
 **对偶形式**
 
-令$\alpha_i=n_i\eta$，则误分条件为：$y_i(\sum_{j=1}^Na_jy_jx_j·x_i+b)\leqslant0$，更新：$\alpha_i:=\alpha_i+\eta，b:=b+\eta y_i$，结果求得$w=\sum_{i=1}^N\alpha_iy_ix_i$。在求误分条件时所用内积可以先求出来存在矩阵中（**Gram矩阵**）：$G=[x_i·x_j]_{N\times N}$
+令$\alpha_i=n_i\eta$，则误分条件为：$\large y_i(\sum_{j=1}^Na_jy_jx_j·x_i+b)\leqslant0$，更新：$\large \alpha_i:=\alpha_i+\eta，b:=b+\eta y_i$，结果求得 $\large w=\sum_{i=1}^N\alpha_iy_ix_i$，在求误分条件时所用内积可以先求出来存在矩阵中（**Gram矩阵**）：$G=[x_i·x_j]_{N\times N}$
 
 可以证明感知机的原始和对偶形式都是收敛的
 
@@ -75,6 +75,7 @@ k值越小，近似误差越小，估计误差越大，模型更复杂，容易�
 
 给定一组数据，找出一种关系来预测标签：
 $$
+\large{
 X=\begin{bmatrix}
 x_{11}&x_{12}&...&x_{1d}&1\\
 x_{21}&x_{22}&...&x_{2d}&1\\ 
@@ -84,18 +85,19 @@ x_{m1}&x_{m2}&...&x_{md}&1\\
 y=(y_1,y_2,...,y_m)^T\\
 广义参数\quad\hat{w}=(w_1,...,w_n;b)^T\\
 y=X\hat{w}^T
+}
 $$
-这里采用平方误差求最优$\hat{w}$： $f(\hat{w})=\sum_{i=1}^m(y_i-x_i^T\hat{w})^2$
+这里采用平方误差求最优$\hat{w}$： $\large f(\hat{w})=\sum_{i=1}^m(y_i-x_i^T\hat{w})^2$
 
-对于上述式子$f(\hat{w})$可以通过梯度下降等方法得到最优解。但是使用矩阵表示将会使求解和程序更为简单：$f(\hat{w})=(y-X\hat{w})^T(y-X\hat{w})$
+对于上述式子$f(\hat{w})$可以通过梯度下降等方法得到最优解。但是使用矩阵表示将会使求解和程序更为简单：$\large f(\hat{w})=(y-X\hat{w})^T(y-X\hat{w})$
 
-将$f(\hat{w})$对$\hat{w}$求导可得：$\cfrac{\partial f(\hat{w})}{\partial \hat{w}}=2X^T(X\hat{w}-y)$
+将$f(\hat{w})$对$\hat{w}$求导可得：$\large \cfrac{\partial f(\hat{w})}{\partial \hat{w}}=2X^T(X\hat{w}-y)$
 
-当$X^TX$为满秩矩阵或正定矩阵时，使上式等于0，便可得到：$\hat{w}=(X^TX)^{-1}X^Ty$
+当$X^TX$为满秩矩阵或正定矩阵时，使上式等于0，便可得到：$\large \hat{w}=(X^TX)^{-1}X^Ty$
 
 实际中，$X^TX$往往不是满秩矩阵，此时可引入正则化项
 
-模型可推广至**广义线性模型**：$y=g^{-1}(w^Tx+b)$
+模型可推广至**广义线性模型**：$\large y=g^{-1}(w^Tx+b)$
 
 
 
@@ -110,8 +112,8 @@ $$
 
 **模型评估**
 
-+ 均方差(MSE）:    $MSE=\cfrac{1}{n}\sum_{i=1}^n(y_i-\hat{y}_i)^2=\cfrac{1}{n}L$，平均误差=$\sqrt{MSE}$
-+ 决定系数（coefficient of determination）：$SS_{tot}=\sum_i(y_i-\bar{y})^2$； $SS_{res}=\sum_i(y_i-\hat{y}_i)^2$； $R^2=1-\cfrac{SS_{res}}{SS_{tot}}$，决定系数表示有多少的因变量变化能由模型解释
++ 均方差(MSE）:    $\large MSE=\cfrac{1}{n}\sum_{i=1}^n(y_i-\hat{y}_i)^2=\cfrac{1}{n}L$，平均误差=$\sqrt{MSE}$
++ 决定系数（coefficient of determination）：$\large SS_{tot}=\sum_i(y_i-\bar{y})^2,\quad SS_{res}=\sum_i(y_i-\hat{y}_i)^2,\quad R^2=1-\cfrac{SS_{res}}{SS_{tot}} $，决定系数表示有多少的因变量变化能由模型解释
 
 ```python
 from sklearn.linear_model import LinearRegression
@@ -201,7 +203,7 @@ res = model.fit_regularized(alpha=alpha)
 
 下图为$\alpha$改变时三个参数的变化规律
 
-![image-20200604222642765](E:\Programming\Github\md_note\MachineLearning\惩罚项.png)
+![image-20200604222642765](..\惩罚项.png)
 
 + 前向逐步回归：贪心，开始所有权重设为1，每一步对某个权重增加或减少一个值，迭代若干次即可收敛得到超参数
 
@@ -263,13 +265,13 @@ def stageWise(xArr,yArr,eps=0.01,numIt=100):
 
 原均方差和修改后均方差如下所示：
 
-$\mathcal{L} = \dfrac{1}{2} \left[ \left(y^{(1)} -  \boldsymbol{\theta}^T \mathbf{x}^{(1)} \right)^2 + \left(y^{(2)} -  \boldsymbol{\theta}^T \mathbf{x}^{(2)} \right)^2 + \cdots +  \left(y^{(m)} - \boldsymbol{\theta}^T \mathbf{x}^{(m)} \right)^2 \right]$
+$\large \mathcal{L} = \dfrac{1}{2} \left[ \left(y^{(1)} -  \boldsymbol{\theta}^T \mathbf{x}^{(1)} \right)^2 + \left(y^{(2)} -  \boldsymbol{\theta}^T \mathbf{x}^{(2)} \right)^2 + \cdots +  \left(y^{(m)} - \boldsymbol{\theta}^T \mathbf{x}^{(m)} \right)^2 \right]$
 
-$\begin{align*} \mathcal{L} &= \dfrac{1}{2} \left[ w^{(1)}  \left(y^{(1)} - \boldsymbol{\theta}^T \mathbf{x}^{(1)} \right)^2 +  w^{(2)} \left(y^{(2)} - \boldsymbol{\theta}^T \mathbf{x}^{(2)} \right)^2 + \cdots + w^{(m)} \left(y^{(m)} - \boldsymbol{\theta}^T  \mathbf{x}^{(m)} \right)^2 \right] \\ &= \frac{1}{2} \sum_{i=1}^m  w^{(i)} \left(y^{(i)} - \boldsymbol{\theta}^T \mathbf{x}^{(i)}\right)^2 \end{align*}$
+$\large \begin{align*} \mathcal{L} &= \dfrac{1}{2} \left[ w^{(1)}  \left(y^{(1)} - \boldsymbol{\theta}^T \mathbf{x}^{(1)} \right)^2 +  w^{(2)} \left(y^{(2)} - \boldsymbol{\theta}^T \mathbf{x}^{(2)} \right)^2 + \cdots + w^{(m)} \left(y^{(m)} - \boldsymbol{\theta}^T  \mathbf{x}^{(m)} \right)^2 \right] \\ &= \frac{1}{2} \sum_{i=1}^m  w^{(i)} \left(y^{(i)} - \boldsymbol{\theta}^T \mathbf{x}^{(i)}\right)^2 \end{align*}$
 
 修改后的加上了权重w：
 
-$w^{(i)} = \exp \left( - \dfrac{\left(\mathbf{x}^{(i)} - \mathbf{x}\right)^2}{2k^2} \right)$
+$\large w^{(i)} = \exp \left( - \dfrac{\left(\mathbf{x}^{(i)} - \mathbf{x}\right)^2}{2k^2} \right)$
 
 缺点是每个点做预测时都要使用整个数据集，计算量大，可改进
 
@@ -279,7 +281,7 @@ $w^{(i)} = \exp \left( - \dfrac{\left(\mathbf{x}^{(i)} - \mathbf{x}\right)^2}{2k
 
 普通的回归分析，只得到y的期望；分位数回归，可以探索y的完整分布状况
 
-![image-20201112164901096](/MachineLearning\分位数回归.png)
+![image-20201112164901096](..\分位数回归.png)
 
 分别取多个分位点[0,1]来进行回归拟合，得到若干条回归线（例：分位点0.9，得到的回归线下方有90%的数据点）
 
@@ -299,11 +301,11 @@ $w^{(i)} = \exp \left( - \dfrac{\left(\mathbf{x}^{(i)} - \mathbf{x}\right)^2}{2k
 
 似然函数为：$\prod_{i=1}^N[\pi(x_i)]^{y_i}[1-\pi(x_i)]^{1-y_i}$，定义广义参数：$\beta=(w_1,...,w_n;b)^T$
 
-**损失函数**：$L(w)=\sum_{i=1}^N[y_iln\pi(x_i)+(1-y_i)ln(1-\pi(x_i)]=\sum_{i=1}^N[y_i(\beta^Tx_i)-ln(1+e^{(\beta^Tx_i+b)}]$ 
+**损失函数**： $\large L(w)=\sum_{i=1}^N[y_iln\pi(x_i)+(1-y_i)ln(1-\pi(x_i)]=\sum_{i=1}^N[y_i(\beta^Tx_i)-ln(1+e^{(\beta^Tx_i+b)}]$
 
 可使用改进的迭代尺度法或拟牛顿法解决最大熵最优化问题
 
-<img src="E:\Programming\Github\md_note\MachineLearning\逻辑函数近似.png" alt="image-20200611103957090" style="zoom:80%;" />
+<img src="..\逻辑函数近似.png" alt="image-20200611103957090" style="zoom:80%;" />
 
 
 
@@ -392,28 +394,32 @@ model.fit(X, Y.ravel())
 
 如图，空间中的直线可以用一个线性方程来表示：$w·x+b=0$ ，w为法向量，法向量指向一侧为正类
 
-**函数间隔**：$样本点\hat{\gamma_i}=y_i(w·x+b)，超平面\hat{\gamma}=min\hat{\gamma_i}$，表示分类的正确性
+**函数间隔**：$\large 样本点\,\hat{\gamma_i}=y_i(w·x+b)，超平面\,\hat{\gamma}=min\hat{\gamma_i}$，表示分类的正确性
 
-**几何间隔**：$\gamma = \hat{\gamma}/||w||$，表示点与超平面距离
+**几何间隔**：$\large \gamma = \cfrac{1}{||w||}\hat{\gamma}$，表示点与超平面距离
 
-![image-20200629225442920](E:\Programming\Github\md_note\MachineLearning\svm向量基础.png)
+![image-20200629225442920](..\svm向量基础.png)
 
 **硬间隔最大化**
 
 原始问题为：
 $$
+\large{
 max_{w,b}\hat{\gamma}/||w||\\
 s.t. y_i(w·x_i+b)\geqslant\hat{\gamma}
+}
 $$
 
 函数间隔取值不影响最优化问题的解，取$\hat{\gamma}=1$，并对损失函数作等价替换：
 $$
+\large{
 min_{w,b}\frac12||w||^2\\
 s.t.\quad y_i(w·x_i+b)-1\geqslant0
+}
 $$
 此时演变成一个**凸二次规划问题**，分类决策函数为$f(x)=sign(w^*·x+b^*)$
 
-![image-20200629232128776](E:\Programming\Github\md_note\MachineLearning\svm原理1.png)
+![image-20200629232128776](..\svm原理1.png)
 
 
 
@@ -421,27 +427,33 @@ $$
 
 对于**线性不可分问题**，需要加入**松弛参数$\xi$**和**惩罚参数$C$**，其中$\xi_i$与点 i 离相应虚线的距离成正比，表示数据 i 这一点违反自身分类原则的程度，所有点的$\xi_i$和越小越好，合并损失函数：
 $$
+\large{
 min_{w,b,\xi}\,\, \frac12||w||^2+C\sum_{i=1}^N\xi_i\\
 s.t. \quad y_i(w·x_i+b)\geqslant1-\xi_i,\quad \xi_i\geqslant0
+}
 $$
 将上述原始问题转化为对偶问题：
 $$
+\large{
 max_{\alpha}\,\, -\frac12 \sum_{i=1}^N\sum_{j=1}^N\alpha_i\alpha_jy_iy_j(x_i·x_j)+\sum_{i=1}^N\alpha_i\\
 s.t.\quad \sum_{i=1}^N\alpha_iy_i=0, \quad 0\leqslant\alpha_i\leqslant C
+}
 $$
 事实上是寻找与被测数据相似的训练数据，并将相应的因变量加权平均得到最后的预测值。只有在虚线上或虚线内的点权重才不为0，其他点权重都为0：
 
-<img src="E:\Programming\Github\md_note\MachineLearning\svm支持向量.png" alt="image-20200622181820083" style="zoom:50%;" />
+<img src="..\svm支持向量.png" alt="image-20200622181820083" style="zoom:50%;" />
 
 引入合页损失函数（取正值）后，可将上述原始最优化问题等价为：
 $$
+\large{
 min_{w,b,\xi}\quad \lambda||w||^2+\sum_{i=1}^N[1-y_i(w·x_i+b)]_+
+}
 $$
 损失函数的前一部分为**L2惩罚项**，后一部分为**预测损失LL（hinge loss）**，代替0/1损失函数
 
-其中超参数C是模型预测损失的权重，C越大表示模型越严格，margin越小，考虑的点越少，称为**hard margin**，C越小考虑的点越多，称为**soft margin**
+其中超参数 C 是模型预测损失的权重，C 越大表示模型越严格，margin越小，考虑的点越少，称为**hard margin**，C越小考虑的点越多，称为**soft margin**
 
-<img src="E:\Programming\Github\md_note\MachineLearning\svm超参数.png" alt="image-20200615221059133" style="zoom:60%;" />
+<img src="..\svm超参数.png" alt="image-20200615221059133" style="zoom:60%;" />
 
 **核函数**
 
@@ -449,9 +461,11 @@ $K(x_i,x_j)=\phi(x_i)·\phi(x_j)$ ，其中$\phi(x)$为空间变换
 
 利用核函数，可以极大减少模型运算量，隐式地在特征空间进行学习，不需要显式定义特征空间和映射函数，并且完成未知的空间变换，将对偶问题中的向量点乘变为核函数即可：
 $$
+\large{
 max_{\alpha}\,\, -\frac12 \sum_{i=1}^N\sum_{j=1}^N\alpha_i\alpha_jy_iy_jK(x_i,x_j)+\sum_{i=1}^N\alpha_i\\
 s.t.\quad \sum_{i=1}^N\alpha_iy_i=0, \quad 0\leqslant\alpha_i\leqslant C\\
 f(x)=sign(\sum_{i=1}^N\alpha_i^*y_iK(x_i,x)+b^*)
+}
 $$
 这等价于经过映射函数将输入空间变换到一个新的特征空间中，上述表达式也是广义支持向量机的形式
 
@@ -459,7 +473,7 @@ $$
 
 实际应用中，可以用网格搜寻的办法找到最合适的核函数
 
-<img src="E:\Programming\Github\md_note\MachineLearning\常用核函数.png" alt="image-20200622182951633" style="zoom:67%;" />
+<img src="..\常用核函数.png" alt="image-20200622182951633" style="zoom:67%;" />
 
 **序列最小最优化算法（SMO）**
 
@@ -479,7 +493,7 @@ $$
 
 使用SVM模型，容忍f(x)与y之间最多有$\epsilon$的偏差
 
-![image-20200630193740226](E:\Programming\Github\md_note\MachineLearning\svr.png)
+![image-20200630193740226](..\svr.png)
 
 ```python 
 from sklearn.svm import SVC
@@ -746,17 +760,17 @@ dtProb = dtModel.predict_proba(testData[features])[:, 1]
 
   随机来源及scikit-learn函数如下：
 
-  <img src="E:\Programming\Github\md_note\MachineLearning\随机森林.png" alt="image-20200623110624949" style="zoom: 67%;" />
+  <img src="..\随机森林.png" alt="image-20200623110624949" style="zoom: 67%;" />
 
 + **随机森林高维映射（Random Forest Embedding）**
 
   可以将随机森林当作非监督式学习使用，随机抽取特征组合成合成数据，与原始数据一起进行决策树训练。当分类结果误差较小时，说明各变量间的相关关系比较强烈
 
-  <img src="E:\Programming\Github\md_note\MachineLearning\rfe.png" alt="image-20200623111544046" style="zoom:50%;" />
+  <img src="..\rfe.png" alt="image-20200623111544046" style="zoom:50%;" />
 
   使用随机森林将低维数据映射到高维后，可以与其他模型联结：
 
-  <img src="E:\Programming\Github\md_note\MachineLearning\rfe2.png" alt="image-20200623111941192" style="zoom:55%;" />
+  <img src="..\rfe2.png" alt="image-20200623111941192" style="zoom:55%;" />
 
 ```python
 from sklearn.ensemble import RandomTreesEmbedding
@@ -796,7 +810,7 @@ plt.show()
 
 分类器$h_i$与$h_j$的预测结果列联表为：
 
-![image-20200707125217670](E:\Programming\Github\md_note\MachineLearning\分类器列联表.png)
+![image-20200707125217670](..\分类器列联表.png)
 
 给出常见多样性度量：
 
@@ -858,13 +872,13 @@ plt.show()
 
 - **贝叶斯网(Bayesian network)**：贝叶斯网表示：$B=<G,\Theta>$，$G$描述一个有向无环图，$\Theta$包含每个属性的条件 $\theta_{x_i|\pi_i}=P_B(x_i|\pi_i)$，$\pi_i$ 为 $x_i$ 的父节点集，不相连的属性独立：$P_B(x_1,x_2,...,x_d)=\prod_{i=1}^dP_B(x_i|\pi_i)$
 
-  ![image-20201125150911739](E:\Programming\Github\md_note\MachineLearning\贝叶斯网.png)
+  ![image-20201125150911739](..\贝叶斯网.png)
 
   图中：$P(x_1,x_2,x_3,x_4,x_5)=P(x_1)P(x_2)P(x_3|x_1)P(x_4|x_1,x_2)P(x_5|x_2)$，给定$x_1$时$x_3,x_4$独立，给定$x_2$时$x_4,x_5$独立，分别记为：$x_3\bot x_4|x_1$，$x_4\bot x_5|x_2$
 
   **贝叶斯网中三个变量间的典型依赖关系**
 
-  ![image-20201125152210332](E:\Programming\Github\md_note\MachineLearning\贝叶斯网三种依赖关系.png)
+  ![image-20201125152210332](..\贝叶斯网三种依赖关系.png)
 
   - 同父结构：给定父结点取值，子结点条件独立，$x_3\bot x_4|x_1$
   - V型结构：给定子结点取值，父结点必不独立；若子结点取值完全未知，则父结点独立（边际独立性）
@@ -874,7 +888,7 @@ plt.show()
 
   得到**道德图**。如果去除集合 $\vec{z}$，x和y分属两个连通分支，则 x 和 y 被 $\vec{z}$ 有向分离，$x\bot y|\vec{z}$
 
-  ![image-20201125154144717](E:\Programming\Github\md_note\MachineLearning\道德图.png)
+  ![image-20201125154144717](..\道德图.png)
 
   
 

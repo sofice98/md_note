@@ -58,7 +58,9 @@ $w_{ij}(t+1)=w_{ij}(t)+\eta (d_i-y_i)x_j(t)$，$d_i$为第 i 个神经元的期�
 
 
 
-## 多层前馈神经网络
+## 深度前馈网络(Deep Feedforward Network)
+
+即**多层感知机(multilayer perceptron, MLP)**，深度学习自动学习非线性变换$\phi(x)$，使之能用于线性模型
 
 每层神经元与下一层**全连接**，神经元不存在同层连接，也不存在跨层连接
 
