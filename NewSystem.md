@@ -56,6 +56,16 @@ vscode-icons
 
 Bracket Pair Colorizer 2
 
+tabline
+
+jupyter
+
+latex workshop（需texlive）https://www.cnblogs.com/meiqin970126/p/10984568.html
+
+https://blog.csdn.net/weixin_39892850/article/details/105468247
+
+latex language support
+
 
 
 # Anaconda
