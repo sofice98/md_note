@@ -1,3 +1,5 @@
+$K$为标签数，$d$为特征数，$K_i$为$X_i$的类别数，$N$为样本数，$D$为数据集，$D_c$为数据子集
+
 # 判别式模型(Discriminative Model)
 
 直接学习条件分布概率$P(Y|X)$
@@ -394,7 +396,7 @@ model.fit(X, Y.ravel())
 
 如图，空间中的直线可以用一个线性方程来表示：$w·x+b=0$ ，w为法向量，法向量指向一侧为正类
 
-**函数间隔**：$\large 样本点\,\hat{\gamma_i}=y_i(w·x+b)，超平面\,\hat{\gamma}=min\hat{\gamma_i}$，表示分类的正确性
+**函数间隔**：样本点 $\large \hat{\gamma_i}=y_i(w·x+b)，$超平面 $\large \hat{\gamma}=\min\hat{\gamma_i}$，表示分类的正确性
 
 **几何间隔**：$\large \gamma = \cfrac{1}{||w||}\hat{\gamma}$，表示点与超平面距离
 
@@ -405,15 +407,15 @@ model.fit(X, Y.ravel())
 原始问题为：
 $$
 \large{
-max_{w,b}\hat{\gamma}/||w||\\
-s.t. y_i(w·x_i+b)\geqslant\hat{\gamma}
+\max_{w,b}\hat{\gamma}/||w||\\
+s.t.\quad y_i(w·x_i+b)\geqslant\hat{\gamma}
 }
 $$
 
-函数间隔取值不影响最优化问题的解，取$\hat{\gamma}=1$，并对损失函数作等价替换：
+函数间隔取值不影响最优化问题的解，取 $\hat{\gamma}=1$，并对损失函数作等价替换：
 $$
 \large{
-min_{w,b}\frac12||w||^2\\
+\min_{w,b}\frac12||w||^2\\
 s.t.\quad y_i(w·x_i+b)-1\geqslant0
 }
 $$
@@ -428,14 +430,14 @@ $$
 对于**线性不可分问题**，需要加入**松弛参数$\xi$**和**惩罚参数$C$**，其中$\xi_i$与点 i 离相应虚线的距离成正比，表示数据 i 这一点违反自身分类原则的程度，所有点的$\xi_i$和越小越好，合并损失函数：
 $$
 \large{
-min_{w,b,\xi}\,\, \frac12||w||^2+C\sum_{i=1}^N\xi_i\\
+\min_{w,b,\xi}\,\, \frac12||w||^2+C\sum_{i=1}^N\xi_i\\
 s.t. \quad y_i(w·x_i+b)\geqslant1-\xi_i,\quad \xi_i\geqslant0
 }
 $$
 将上述原始问题转化为对偶问题：
 $$
 \large{
-max_{\alpha}\,\, -\frac12 \sum_{i=1}^N\sum_{j=1}^N\alpha_i\alpha_jy_iy_j(x_i·x_j)+\sum_{i=1}^N\alpha_i\\
+\max_{\alpha}\,\, -\frac12 \sum_{i=1}^N\sum_{j=1}^N\alpha_i\alpha_jy_iy_j(x_i·x_j)+\sum_{i=1}^N\alpha_i\\
 s.t.\quad \sum_{i=1}^N\alpha_iy_i=0, \quad 0\leqslant\alpha_i\leqslant C
 }
 $$
@@ -446,7 +448,7 @@ $$
 引入合页损失函数（取正值）后，可将上述原始最优化问题等价为：
 $$
 \large{
-min_{w,b,\xi}\quad \lambda||w||^2+\sum_{i=1}^N[1-y_i(w·x_i+b)]_+
+\min_{w,b,\xi}\quad \lambda||w||^2+\sum_{i=1}^N[1-y_i(w·x_i+b)]_+
 }
 $$
 损失函数的前一部分为**L2惩罚项**，后一部分为**预测损失LL（hinge loss）**，代替0/1损失函数
@@ -834,65 +836,101 @@ plt.show()
 
 ## 贝叶斯决策论(Bayes Dicision Theory)
 
-- **贝叶斯决策论**：概率框架下，实施决策的基本方法
+**贝叶斯决策论**：概率框架下，实施决策的基本方法
 
-  假设有K种类别$c_1,...,c_K$，$\lambda_{ij}$是将一个真是标签为$c_j$的样本误分类为$c_i$所产生的损失，条件风险（期望损失）为：$R(c_i|x)=\sum_{j=1}^K\lambda_{ij}P(c_j|x)$，贝叶斯判定准则就是要最小化总体风险，贝叶斯最优分类器为：$h^*(x)=argmin_c R(c|x)$
+- **最小错误率贝叶斯决策**
 
-  当目标是最小化分类错误率时，$\lambda_{ij}=\begin{cases} 0,\quad i=j\\1,\quad otherwise \end{cases}$，$h^*(x)=argmax_c P(c|x)$，即选择使后验概率最大的类别
+  以平均错误率最小为规则，进行分类决策
 
-- **贝叶斯定理**：$P(y|X)=\cfrac{P(X|y)P(y)}{P(x)}$
+  $P(X)=\sum_{i=1}^KP(X|y_i)P(y_i)$，错误率：$P(e|X)=\begin{cases}p(y_2|X),X分类到y_1\\p(y_1|X),X分类到y_2\end{cases}$，平均错误率：$P(e)=\int P(e|X)P(X)dX$
 
-  - $P(y|X)$为后验概率，表示得知样本特征情况下，其属于各类标签的概率
-  - $P(y)$为类先验概率，表示样本空间中各类样本所占比例，由大数定律可通过频率估计
-  - $P(X|y)$为类条件概率（似然），表示得知样本标签情况下，其特征取给定值的概率
-  - $P(y|X)$为用于归一化的证据因子，与类标记无关
+- **最小风险贝叶斯决策**
 
-  加上拉普拉斯平滑：$\hat{P}(c)=\cfrac{|D_c|+\lambda}{|D|+K\lambda},\quad \hat{P}(x_i|c)=\cfrac{|D_{c,x_i}|+\lambda}{|D_c|+K_i\lambda}$，解决训练集某特征不出现的情况
+  以各种错误分类所造成的平均风险最小为规则，进行分类决策
 
-  
+  假设有K种类别$y_1,...,y_K$，$\lambda_{ij}$是将一个真实标签为$y_j$的样本误分类为$y_i$所产生的损失，条件风险（期望损失）为：$R(y_i|x)=\sum_{j=1}^K\lambda_{ij}P(y_j|x)$，贝叶斯判定准则就是要最小化总体风险，贝叶斯最优分类器为：$h^*(x)=\arg\min_y R(y|x)$
 
-- **朴素贝叶斯假设(Naive Bayes Assumption)**：假设各特征相互独立：$P(X_1=x_1,X_2=x_2,...,X_d=x_d|y=c_k)=\prod_{i=1}^N P(X_i=x_i|y=c_k)$ ，越独立效果越好
+  当目标是最小化分类错误率时，$\lambda_{ij}=\begin{cases} 0,\quad i=j\\1,\quad otherwise \end{cases}$，$h^*(x)=\arg\max_y P(y|x)$，即选择使后验概率最大的类别
 
-- **朴素贝叶斯法**：基于贝叶斯定理与朴素贝叶斯假设的分类方法。先利用独立条件根据样本求得先验概率和类条件概率，再使用极大似然估计或者贝叶斯估计，求得各个后验概率值，取最大概率作为估计值。朴素贝叶斯最优分类器为：$h_{nb}^*(x)=argmin_c P(c)\prod_{i=1}^d P(c_i|x)$
-
-  对于连续属性，假设似然满足正态分布：$p(x|c)\sim \Nu(\mu_c,\sigma_c^2)$，则参数的极大似然估计为：$\hat{\mu}_c=\cfrac{1}{|D_c|}\sum_{x\in D_c}x,\quad \hat{\sigma}_c^2=\cfrac{1}{|D_c|}\sum_{x\in D_c}(x-\hat{\mu})(x-\hat{\mu})^T$，类条件概率估计为：$\hat{p}(x_i|c)=\cfrac{1}{\sqrt{2\pi}\sigma_{c,i}}exp(-\cfrac{(x_i-\mu_{c,i})^2}{2\sigma_{c,i}^2})$
+  最小错误率贝叶斯决策是最小风险贝叶斯决策的一种特例
 
 
 
-- **最大似然估计(Maximum Likelihood Estimation, MLE)**：频率学派，认为估计参数为定值，通过最大化似然求得估计值：$P(D_c|\theta_c)=\prod_{x\in D_c}P(x|\theta_c)$，$Dc$为训练集 D 中第 c 类样本组成的集合，或使用对数似然 $LL(\theta_c)=log P(D_c|\theta_c)$避免下溢。
-- **贝叶斯估计**：贝叶斯学派，认为估计参数是未观察到的随机变量，也有概率分布，可假定一个先验分布，计算后验分布。当样本数足够大时，两种的参数估计值相同，当样本小且参数先验分布较准确时，贝叶斯估计较准确。
+**贝叶斯定理**：$P(y|X)=\cfrac{P(X|y)P(y)}{P(X)}$
+
+- $P(y|X)：$后验概率，表示得知样本特征情况下，其属于各类标签的概率
+- $P(y)$：类先验概率，表示样本空间中各类样本所占比例，由大数定律可通过频率估计
+- $P(X|y)$：类条件概率（似然），表示得知样本标签情况下，其特征取给定值的概率
+- $P(X)$：用于归一化的证据因子，与类标记无关
+
+加上拉普拉斯平滑：$\hat{P}(c)=\cfrac{|D_c|+\lambda}{|D|+K\lambda},\quad \hat{P}(x_i|c)=\cfrac{|D_{c,x_i}|+\lambda}{|D_c|+K_i\lambda}$，解决训练集某特征不出现的情况
 
 
 
-- **半朴素贝叶斯分类器(semi-naive Bayes classifiers)**：适当考虑一部分属性间的相互依赖信息。**独依赖估计(One-Dependent Estimator,ODE)**即假设每个属性在类别之外最多仅依赖于一个其他属性。
+**朴素贝叶斯假设(Naive Bayes Assumption)**
 
-  - **Super-Parent ODE(SPODE)**：假设所有属性都依赖于同一个属性（超父），通过交叉验证等模型选择方法来确定超父属性
-  - **Tree Augmented naive Bayes(TAN)**：在最大带权生成树算法的基础上，简化属性间依赖关系
-  - **Averaged One-Dependent Estimator(AODE)**：尝试将每个属性作为超父来构建SPODE，再将具有足够训练数据支撑的SPODE集成起来
+假设各特征相互独立：$P(X_1=x_1,X_2=x_2,...,X_d=x_d|y=y_k)=\prod_{i=1}^N P(X_i=x_i|y=y_k),\quad P(X)=\prod_{i=1}^d P(X_i=x_i)$ ，越独立效果越好
 
-- **贝叶斯网(Bayesian network)**：贝叶斯网表示：$B=<G,\Theta>$，$G$描述一个有向无环图，$\Theta$包含每个属性的条件 $\theta_{x_i|\pi_i}=P_B(x_i|\pi_i)$，$\pi_i$ 为 $x_i$ 的父节点集，不相连的属性独立：$P_B(x_1,x_2,...,x_d)=\prod_{i=1}^dP_B(x_i|\pi_i)$
+**朴素贝叶斯法**
 
-  ![image-20201125150911739](..\贝叶斯网.png)
+基于贝叶斯定理与朴素贝叶斯假设的分类方法。先利用独立条件根据样本求得先验概率和类条件概率，再使用极大似然估计或者贝叶斯估计，求得各个后验概率值，取最大概率作为估计值。朴素贝叶斯最优分类器为：$h_{nb}^*(x)=\arg\min_y P(y)\prod_{i=1}^d P(y_i|x)$
 
-  图中：$P(x_1,x_2,x_3,x_4,x_5)=P(x_1)P(x_2)P(x_3|x_1)P(x_4|x_1,x_2)P(x_5|x_2)$，给定$x_1$时$x_3,x_4$独立，给定$x_2$时$x_4,x_5$独立，分别记为：$x_3\bot x_4|x_1$，$x_4\bot x_5|x_2$
+对于连续属性，假设似然满足正态分布：$p(x|c)\sim \Nu(\mu_c,\sigma_c^2)$，则参数的极大似然估计为：$\hat{\mu}_c=\cfrac{1}{|D_c|}\sum_{x\in D_c}x,\quad \hat{\sigma}_c^2=\cfrac{1}{|D_c|}\sum_{x\in D_c}(x-\hat{\mu})(x-\hat{\mu})^T$，类条件概率估计为：$\hat{p}(x_i|c)=\cfrac{1}{\sqrt{2\pi}\sigma_{c,i}}exp(-\cfrac{(x_i-\mu_{c,i})^2}{2\sigma_{c,i}^2})$，多变量：$p(x)=\cfrac{1}{(2\pi)^{n/2}|\Sigma|^{1/2}}\exp\{ -\cfrac{1}{2}(X-\mu)^\top\Sigma^{-1}(X-\mu) \}$
 
-  **贝叶斯网中三个变量间的典型依赖关系**
+马氏距离：$\sqrt{(X-\mu)^\top\Sigma^{-1}(X-\mu)}$，表示数据的协方差距离，是一种计算两个未知样本集的相似度的方法
 
-  ![image-20201125152210332](..\贝叶斯网三种依赖关系.png)
 
-  - 同父结构：给定父结点取值，子结点条件独立，$x_3\bot x_4|x_1$
-  - V型结构：给定子结点取值，父结点必不独立；若子结点取值完全未知，则父结点独立（边际独立性）
-  - 顺序结构：给定中间结点取值，两头结点独立，$y\bot z|x$
 
-  **有向分离(D-separation)**：找出有向图中变量间的条件独立性——1. 用无向边连接所有V型结构的父结点，2. 将所有有向边改为无向边
+**概率密度函数估计方法**
 
-  得到**道德图**。如果去除集合 $\vec{z}$，x和y分属两个连通分支，则 x 和 y 被 $\vec{z}$ 有向分离，$x\bot y|\vec{z}$
+- 参数估计：已知概率密度函数的形式，只是其中几个参数未知，目标是根据样本估计这些参数的值
+  - **最大似然估计(Maximum Likelihood Estimation, MLE)**
 
-  ![image-20201125154144717](..\道德图.png)
+    频率学派，认为估计参数为定值，通过最大化似然求得估计值：$P(D_c|\theta_c)=\prod_{x\in D_c}P(x|\theta_c)$，$Dc$为训练集 D 中第 c 类样本组成的集合，或使用对数似然 $LL(\theta_c)=log P(D_c|\theta_c)$避免下溢。
 
-  
+  - **贝叶斯估计(Bayesian Estimation)**
 
-  
+    贝叶斯学派，认为估计参数是未观察到的随机变量，也有概率分布。可假定一个先验分布 $p(\theta)$，计算条件分布 $p(X|\theta)=\sum_{i=1}^Np(x_i|\theta)$，再计算后验分布 $p(\theta|X)$，得贝叶斯估计量为：$\hat\theta=\int \theta\cdot p(\theta|X)d\theta$。当样本数足够大时，两种的参数估计值相同，当样本小且参数先验分布较准确时，贝叶斯估计较准确。
+
+- 非参数估计：概率密度函数的形式未知，直接估计概率密度函数的方法
+
+
+
+**半朴素贝叶斯分类器(semi-naive Bayes classifiers)**
+
+适当考虑一部分属性间的相互依赖信息。**独依赖估计(One-Dependent Estimator,ODE)**即假设每个属性在类别之外最多仅依赖于一个其他属性。
+
+- **Super-Parent ODE(SPODE)**：假设所有属性都依赖于同一个属性（超父），通过交叉验证等模型选择方法来确定超父属性
+- **Tree Augmented naive Bayes(TAN)**：在最大带权生成树算法的基础上，简化属性间依赖关系
+- **Averaged One-Dependent Estimator(AODE)**：尝试将每个属性作为超父来构建SPODE，再将具有足够训练数据支撑的SPODE集成起来
+
+
+
+**贝叶斯网(Bayesian network)**
+
+贝叶斯网表示：$B=<G,\Theta>$，$G$描述一个有向无环图，$\Theta$包含每个属性的条件 $\theta_{x_i|\pi_i}=P_B(x_i|\pi_i)$，$\pi_i$ 为 $x_i$ 的父节点集，不相连的属性独立：$P_B(x_1,x_2,...,x_d)=\prod_{i=1}^dP_B(x_i|\pi_i)$
+
+![image-20201125150911739](..\贝叶斯网.png)
+
+图中：$P(x_1,x_2,x_3,x_4,x_5)=P(x_1)P(x_2)P(x_3|x_1)P(x_4|x_1,x_2)P(x_5|x_2)$，给定$x_1$时$x_3,x_4$独立，给定$x_2$时$x_4,x_5$独立，分别记为：$x_3\bot x_4|x_1$，$x_4\bot x_5|x_2$
+
+**贝叶斯网中三个变量间的典型依赖关系**
+
+![image-20201125152210332](..\贝叶斯网三种依赖关系.png)
+
+- 同父结构：给定父结点取值，子结点条件独立，$x_3\bot x_4|x_1$
+- V型结构：给定子结点取值，父结点必不独立；若子结点取值完全未知，则父结点独立（边际独立性）
+- 顺序结构：给定中间结点取值，两头结点独立，$y\bot z|x$
+
+**有向分离(D-separation)**：找出有向图中变量间的条件独立性——1. 用无向边连接所有V型结构的父结点，2. 将所有有向边改为无向边
+
+得到**道德图**。如果去除集合 $\vec{z}$，x和y分属两个连通分支，则 x 和 y 被 $\vec{z}$ 有向分离，$x\bot y|\vec{z}$
+
+![image-20201125154144717](..\道德图.png)
+
+
+
+
 
 
 
@@ -1055,6 +1093,8 @@ def trainModel(trainData, testData, testDocs, docs):
   不要求自变量分布的协方差矩阵一样，但无降维功能，当协方差矩阵为对角矩阵时，二次判别变成高斯模型
 
   调用GaussianNB或QuadraticDiscriminantAnalysis建模
+
+
 
 ## 隐马尔科夫模型(Hidden Markov Model,HMM)
 

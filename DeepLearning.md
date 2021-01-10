@@ -8,51 +8,23 @@
 
 
 
-网络训练两大问题：
+**模式：**广义：一个客观事物的描述，一个可用来仿效的完善的例子。狭义：对客体的定量或结构描述。模式类是具有某些共同特性的模式的集合
 
-+ **梯度弥散/爆炸**
+样本是具体的个体，而模式是对同一类事物概念性的概括
 
-  基于梯度的BP算法的优化，反向传播中，根据链式法则，前一层误差依赖于后一层误差。如果梯度逐渐消失，底层的参数不能有效更新，这也就是梯度弥散(或梯度消失)；反之会使得梯度以指数级速度增大，造成系统不稳定，也就是梯度爆炸问题
+**模式类**：具有某些共同特性的类别或类的总称
 
-  这个问题很大程度上已经被**标准初始化和中间层正规化方法**有效控制了，这些方法使得深度神经网络可以收敛
+模式表示具体的抽象事物，模式类则是对这一类事物的概念性描述
 
-+ **网络退化问题**
+**模式识别：**广义：外部信息到达感觉器官，并被转换成有意义的感觉经验。狭义：计算机自动地（或人尽量少地干涉）把待别识模式分配到各自的模式类中去
 
-  在神经网络可以收敛的前提下，随着网络深度增加，网络的表现先是逐渐增加至饱和，然后迅速下降，这不是过拟合导致的。如果存在某个 K 层的网络 f 是当前最优的网络，那么可以构造一个更深的网络，其最后几层仅是该网络 f 第 K 层输出的恒等映射(Identity Mapping)，就可以取得与 f 一致的结果；也许 K 还不是所谓“最佳层数”，那么更深的网络就可以取得更好的结果。总而言之，与浅层网络相比，更深的网络的表现不应该更差。因此，一个合理的猜测就是，**对神经网络来说，恒等映射并不容易拟合**
-
-
+模式识别用计算方法根据样本特征将样本划分到某个特定的类别中，是从样本到类别的映射
 
 
 
+**处理：**输入与输出是同样的对象，性质不变。
 
-
-
-
-用于模式识别
-
-![神经网络原始模型](\DeepLearning\神经网络原始模型.png)
-
-**若干输入，乘上权重，通过S阈值函数，得到输出**
-
-权重初始值可以为随机值，正态分布，均值为0，方差为
-$$
-\cfrac{1}{\sqrt{inodes}}
-$$
-`self.wih = numpy.random.normal(0.0, pow(self.inodes, -0.5), (self.hnodes, self.inodes))`
-
-
-
-**Hebb学习规则**
-
-无监督，在同一时间被激发的神经元间的联系会被强化。
-
-$w_{ij}(t+1)=w_{ij}(t)+\eta y_iy_j$，$w_{ij}$为神经元 i j 之间的连接权重，$y_i,y_j\in\{-1,1\}$为神经元输出。同时激活或同时抑制会增加权重
-
-**Delta学习规则**
-
-有监督，根据神经元的实际输出与期望输出差别来调整连接权。
-
-$w_{ij}(t+1)=w_{ij}(t)+\eta (d_i-y_i)x_j(t)$，$d_i$为第 i 个神经元的期望输出，$y_i$为第 i 个神经元的实际输出，$x_j$为第 j 个神经元的状态。若神经元实际输出比期望输出大，则减少输入为正的连接的权重，增大所有输入为负的连接的权重。反之，则增大所有输入为正的连接权的权重，减少所有输入为负的连接权的权重。
+**识别：**输入的是事物，输出的是对它的分类、理解和描述
 
 
 
@@ -83,25 +55,38 @@ $w_{ij}(t+1)=w_{ij}(t)+\eta (d_i-y_i)x_j(t)$，$d_i$为第 i 个神经元的期�
 
 **全连接神经网络**：每层神经元与下一层全连接，神经元不存在同层连接，也不存在跨层连接
 
-避免**过拟合**：
+![神经网络原始模型](DeepLearning\神经网络原始模型.png)
 
-+ 早停：若训练集误差降低但验证机误差升高，则停止训练
-+ 正则化：加上网络复杂度权重
+**若干输入，乘上权重，通过S阈值函数，得到输出**
 
-避免**局部极小**：
 
-+ 多组初始值
-+ 模拟退火法
-+ 随机梯度下降
+
+**Hebb学习规则**
+
+无监督，在同一时间被激发的神经元间的联系会被强化。
+
+$\large w_{ij}(t+1)=w_{ij}(t)+\eta y_iy_j$，$w_{ij}$为神经元 i j 之间的连接权重，$y_i,y_j\in\{-1,1\}$为神经元输出。同时激活或同时抑制会增加权重
+
+应用：Hopfield神经网络，自组织映射神经网络
+
+**Delta学习规则**
+
+有监督，根据神经元的实际输出与期望输出差别来调整连接权。
+
+$\large w_{ij}(t+1)=w_{ij}(t)+\eta (d_i-y_i)x_j(t)$，$d_i$为第 i 个神经元的期望输出，$y_i$为第 i 个神经元的实际输出，$x_j$为第 j 个神经元的状态。若神经元实际输出比期望输出大，则减少输入为正的连接的权重，增大所有输入为负的连接的权重。反之，则增大所有输入为正的连接权的权重，减少所有输入为负的连接权的权重。
+
+应用：BP神经网络
+
+
 
 ## 参数学习
 
 **正向传播**
 
-![image-20200602195250519](\DeepLearning\正向传播.png)
-![image-20200602195439442](\DeepLearning\正向传播矩阵.png)
+![image-20200602195250519](DeepLearning\正向传播.png)
+![image-20200602195439442](DeepLearning\正向传播矩阵.png)
 
-**反向传播**
+**反向传播(back propagation)**
 
 反向传播误差进行自学习，自动调整权重
 
@@ -111,13 +96,14 @@ $w_{ij}(t+1)=w_{ij}(t)+\eta (d_i-y_i)x_j(t)$，$d_i$为第 i 个神经元的期�
 
 ![image-20201019133631285](DeepLearning/BP算法.png)
 $$
-设\quad 隐层第h个单元的阈值为\,\gamma_h\quad 输出层第j个单元的阈值为\,\theta_j\\
-对于训练样例(x_k,y_k)，神经网络输出为\hat{y}_j^k=f(\beta_j-\theta_j)\quad 均方误差为E_k=\frac12\sum_{j=1}^l(\hat{y}_j^k-y_j^k)^2\\
-g_j=-\frac{\part E_k}{\part \hat{y}_j^k}\cdot\frac{\part \hat{y}_j^k}{\part \beta_j}=-\hat{y}_j^k(1-\hat{y}_j^k)(\hat{y}_j^k-y_j^k),\quad e_h=-\frac{\part E_k}{\part b_h}\cdot\frac{\part b_h}{\part \alpha_h}=b_h(1-b_h)\sum_{j=1}^lw_{hj}g_j\\
+设\quad 隐层第h个单元的偏置为\,\gamma_h\quad 输出层第j个单元的偏置为\,\theta_j\\
+对于训练样例(x_k,y_k)\quad 神经网络输出为\hat{y}_j^k=f(\beta_j+\theta_j)\quad 隐层输出为b_h=f(\alpha_h+\gamma_h)\quad 均方误差为E_k=\cfrac12\sum_{j=1}^l(\hat{y}_j^k-y_j^k)^2\\
+g_j=-\cfrac{\part E_k}{\part \hat{y}_j^k}\cdot\cfrac{\part \hat{y}_j^k}{\part \beta_j}=-\hat{y}_j^k(1-\hat{y}_j^k)(\hat{y}_j^k-y_j^k)\quad 
+e_h=-\cfrac{\part E_k}{\part \hat{y}_j^k}\cdot\cfrac{\part \hat{y}_j^k}{\part \beta_j}\cdot\cfrac{\part \beta_j}{\part b_h}\cdot\cfrac{\part b_h}{\part \alpha_h}=b_h(1-b_h)\sum_{j=1}^lw_{hj}g_j\\
 \begin{cases} \Delta w_{hj}=\eta g_jb_h \\
-\Delta \theta_j=-\eta g_j \\
+\Delta \theta_j=\eta g_j \\
 \Delta v_{ih}=\eta e_hx_i \\
-\Delta \gamma_h=-\eta e_h \end{cases}
+\Delta \gamma_h=\eta e_h \end{cases}
 $$
 
 
@@ -150,23 +136,54 @@ $\sum_{各层}(前层\times后层+后层)$
 
 
 
+**权重初始值**
+
+可以为随机值，正态分布，均值为0，方差为 $\cfrac{1}{\sqrt{inodes}}$
+
+`self.wih = numpy.random.normal(0.0, pow(self.inodes, -0.5), (self.hnodes, self.inodes))`
+
+
+
 ## 激活函数
 
 用来进行非线性变换
 
 + **sigmoid函数**
 
-  ![image-20200602195133779](\DeepLearning\S阈值函数公式.png)<img src="\DeepLearning\S阈值函数.png" alt="image-20200602194935171" style="zoom: 80%;" /> ${f}'(x)=f(x)(1-f(x))$
+  $\large f(x)=\cfrac{1}{1+e^{-x}}$  ![sigmoid函数](E:\Programming\Github\md_note\DeepLearning\sigmoid函数.png)${f}'(x)=f(x)(1-f(x))$
   
 + **tanh函数**
 
+  $\large f(x)=\cfrac{e^x-e^{-x}}{e^x+e^{-x}}$     <img src="Paper\tanh.png" alt="tanh" style="zoom:67%;" />
+
 + **relu函数(rectified linear unit,整流线性单元)**
 
-  $\large g(x)=max\{0,x\}$      	<img src="DeepLearning\relu.png" alt="img" style="zoom:33%;" />
+  $\large f(x)=max\{0,x\}$      	<img src="DeepLearning\relu.png" alt="relu" style="zoom:33%;" />
 
 + **leaky_relu函数**
 
+  $\large f(x)=max\{\epsilon x,x\}$     ![image-20210110141025211](DeepLearning\leaky_relu.png) 	能获得部分负轴信息
 
+## 网络训练问题
+
++ **梯度弥散/爆炸**
+
+  基于梯度的BP算法的优化，反向传播中，根据链式法则，前一层误差依赖于后一层误差。如果梯度逐渐消失，底层的参数不能有效更新，这也就是梯度弥散(或梯度消失)；反之会使得梯度以指数级速度增大，造成系统不稳定，也就是梯度爆炸问题
+
+  这个问题很大程度上已经被**标准初始化和中间层正规化方法**有效控制了，这些方法使得深度神经网络可以收敛
+
++ **网络退化问题**
+
+  在神经网络可以收敛的前提下，随着网络深度增加，网络的表现先是逐渐增加至饱和，然后迅速下降，这不是过拟合导致的。如果存在某个 K 层的网络 f 是当前最优的网络，那么可以构造一个更深的网络，其最后几层仅是该网络 f 第 K 层输出的恒等映射(Identity Mapping)，就可以取得与 f 一致的结果；也许 K 还不是所谓“最佳层数”，那么更深的网络就可以取得更好的结果。总而言之，与浅层网络相比，更深的网络的表现不应该更差。因此，一个合理的猜测就是，**对神经网络来说，恒等映射并不容易拟合**
+
+- **过拟合**：
+  - 早停：若训练集误差降低但验证机误差升高，则停止训练
+  - 正则化：加上网络复杂度权重
+
+- **局部极小**：
+  - 多组初始值
+  - 模拟退火法
+  - 随机梯度下降
 
 # 正则化
 
@@ -356,7 +373,7 @@ $\sum_{各层}(前层\times后层+后层)$
 
 核大小远小于输入大小，存储参数相比全连接网络更少，计算量更小；虽然直接连接都是很稀疏的，但处在更深层中的单元可以间接连接到大部分输入单元
 
-<img src="\DeepLearning\sparse interactions.png" alt="image-20201219182518807" style="zoom:67%;" />
+<img src="DeepLearning\sparse interactions.png" alt="image-20201219182518807" style="zoom:67%;" />
 
 **参数共享(parameter sharing)**
 
@@ -500,7 +517,7 @@ $\large h^{(t)}=f(h^{(t-1)},x^{(t)};\theta)$
 
 <img src="DeepLearning\birnn.png" alt="image-20201220220337325" style="zoom:80%;" />
 
-## 长短期记忆网络(LSTM)
+## 长短期记忆网络(Long Short-Term Memory,LSTM)
 
 ![image-20201221215944560](DeepLearning\lstm序列.png)
 
@@ -522,7 +539,7 @@ LSTM有三个门，用于保护和控制细胞的状态：
 
   ![image-20201221223702691](DeepLearning\lstm原理2.png)
 
-  选择记忆阶段，对输入进行选择记忆，$i_t$表示输入内容需要被记忆的部分，$\tilde{C}_t$表示输入内容的**记忆程度**
+  选择记忆阶段，对输入进行选择记忆，$i_t$表示输入内容的**记忆程度**，$\tilde{C}_t$表示输入内容需要被记忆的部分
 
   ![image-20201222102708381](DeepLearning\lstm原理3.png)
 
@@ -532,7 +549,7 @@ LSTM有三个门，用于保护和控制细胞的状态：
 
   ![image-20201221224518722](DeepLearning\lstm原理4.png)
 
-  输出阶段，决定哪些将会被当成当前状态的输出$h_t$，$o_t$表示输入内容中需要被输出，$tanh(C_t)$表示对上一个细胞状态的放缩
+  输出阶段，决定哪些将会被当成当前状态的输出$h_t$，$o_t$表示当前时刻输入内容的**输出程度**，$tanh(C_t)$表示对上一个细胞状态的放缩
 
 
 
@@ -569,6 +586,8 @@ LSTM有三个门，用于保护和控制细胞的状态：
 将输入序列映射到不一定等长的输出序列中
 
 Encoder将输入序列编码成一个固定的中间表示向量 $C$，Decoder将 $C$解码成目标序列
+
+Encoder本质是RNN，用来做输入序列到隐变量的映射
 
 <img src="DeepLearning\encoder-decoder.png" alt="image-20201208154602361" style="zoom: 80%;" />
 

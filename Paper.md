@@ -1,3 +1,20 @@
+e.g.
+
+DA-RNN
+
+A Dual-Stage Attention-Based Recurrent Neural Network for Time Series Prediction，Yao Qin et al.，2017，arXiv:1704.02971
+
+- contributions：
+- defect：
+- model：
+- experiment：
+
+
+
+Tensorflflow:Large-scale machine learning on heterogeneous systems
+
+Experience with selecting exemplars from clean data.
+
 # DNN
 
 **语音识别：**
@@ -25,13 +42,33 @@
 
 # RNN及其变体
 
-1. **提出LSTM：**S. Hochreiter and J. Schmidhuber. Long short-term memory. Neural Computation, 1997.
+1. RNN：Learning representations by back-propagating errors
 
-2. **LSTM解决长时间序列问题：**S. Hochreiter and J. Schmidhuber. LSTM can solve hard long time lag problems. 1997.
+   Backpropagation through time:what it does and how to do it
 
-3. **提出GRU：**Learning Phrase Representations using RNN Encoder-Decoder for Statistical Machine Translation
+   Distributed representations, simple recurrent networks, and grammatical structure
 
-4. **评估GRU：**Empirical Evaluation of Gated Recurrent Neural Networks on Sequence Modeling
+2. 梯度消失：Learning long-term dependencies with gradient descent is diffificult
+
+3. 提出LSTM：Long short-term memory. Neural Computation，S. Hochreiter and J. Schmidhuber.，1997.
+
+4. LSTM解决长时间序列问题：LSTM can solve hard long time lag problems，S. Hochreiter and J. Schmidhuber.，1997.
+
+5. 提出GRU：Learning Phrase Representations using RNN Encoder-Decoder for Statistical Machine Translation，Cho et al.，2014
+
+6. 评估GRU：Empirical Evaluation of Gated Recurrent Neural Networks on Sequence Modeling
+
+应用：
+
+1. 语音识别：Speech recognition with deep recurrent neural networks
+
+2. 图像描述：Deep visual-semantic alignments for generating image descriptions
+
+3. 机器翻译：Recurrent continuous translation models
+
+   On the properties of neural machine translation: Encoder-decoder approaches.
+
+   
 
 
 
@@ -39,18 +76,37 @@
 
 1. **提出WaveNet：**WaveNet: A Generative Model for Raw Audio
 
-2. 
 3. Language Modeling with Gated Convolutional Networks
+
+
 
 # TCN
 
-1. **提出TCN：**An Empirical Evaluation of Generic Convolutional and Recurrent Networks for Sequence Modeling，2018，arXiv:1803.01271
+## 提出TCN
 
-   - contributions：将卷积神经网络应用于处理时间序列。多层卷积神经网络在输入序列上创建多层表示张量，其中邻近的源单元在较低的层上相互作用，而较远的源单元在较高的层上相互作用。 与递归网络模型的链结构相比，层次结构提供了较短的获取长期依赖的路径，例如：原来RNN中捕获o(n)的长度，需要o(n)步，在TCN中只需要o(logn)步
+An Empirical Evaluation of Generic Convolutional and Recurrent Networks for Sequence Modeling，Shaojie Bai，2018，arXiv:1803.01271
 
-   - defect：
+- contributions：将卷积神经网络应用于处理时间序列。多层卷积神经网络在输入序列上创建多层表示张量，其中邻近的源单元在较低的层上相互作用，而较远的源单元在较高的层上相互作用。 与递归网络模型的链结构相比，层次结构提供了较短的获取长期依赖的路径，例如：原来RNN中捕获o(n)的长度，需要o(n)步，在TCN中只需要o(logn)步
+- defect：
+- model：
+- experiment：
 
-   - dataset：
+
+
+## 多变量时间序列预测
+
+Temporal Pattern Attention for Multivariate Time Series Forecasting
+
+- contributions：MST，TPA，对不同时间序列关注不同的时间步长，适用于非周期和非线性任务，可解释
+- defect：
+- model：
+- experiment：
+
+
+
+
+
+
 
 **应用：**
 
@@ -70,9 +126,8 @@
 
 - **一维因果卷积：**Seq-U-Net: A One-Dimensional Causal U-Net for Effificient Sequence Modelling
 
-- **多变量时间序列预测：**Temporal Pattern Attention for Multivariate Time Series Forecasting
+  
 
-  （MST，TPA，对不同时间序列关注不同的时间步长，适用于非周期和非线性任务，可解释）
 
 
 
@@ -82,61 +137,158 @@
 
 # 序列建模
 
-1. **经典Seq2Seq+Encoder-Decoder：**Sequence to Sequence Learningwith Neural Network，Sutskever et al.，2014，arXiv:1409.3215
+**时间序列的多变量多步预测**
 
-   - contributions：提出Encoder-Decoder模型，将输入编码为一个中间表示向量，用来提取源序列特征
+长时间依赖问题；
 
-   - defect：源序列的表示向量固定，会丢失一些有用的信息，并且源序列中每个单元权重一样，不符合直觉，在长序列上表现不好
+外生变量使用时可以用到未来值，预测变量不可以；
 
-   - model：
-   
-   - dataset：
-   
-   
+增量学习；
 
-- **将整个输入句子映射到向量：**N. Kalchbrenner and P . Blunsom. Recurrent continuous translation models. In EMNLP, 2013.
-- A. Graves. Generating sequences with recurrent neural networks. In Arxiv preprint arXiv:1308.0850,
-  2013.
-- A. Graves, S. Fern´ andez, F. Gomez, and J. Schmidhuber. Connectionist temporal classification: labelling
-  unsegmented sequence data with recurrent neural networks. In ICML, 2006.
+**多变量**
+
+多个外生序列之间的关系；
+
+每个外生序列对最终预测值有多少影响，可能各个外生序列的各个时间步对预测值的影响权重都不一样
+
+**多步**
+
+多步预测准确性问题，累计误差怎样减小；
+
+关键在于找到时间序列的内在周期性或内在趋势，可能是大趋势加小趋势的叠加；
+
+**应用**
+
+股票，气温，降雨量，车流量，CPU使用率
+
+## 经典Seq2Seq+Encoder-Decoder
+
+Sequence to Sequence Learningwith Neural Network，Sutskever et al.，2014，arXiv:1409.3215
+
+- contributions：提出Encoder-Decoder模型，将输入编码为一个中间表示向量，用来提取源序列特征
+
+- defect：源序列的表示向量固定，会丢失一些有用的信息，长序列上性能快速下降；源序列中每个单元权重一样，不符合直觉，表现也不好
+
+- model：
+
+- experiment：
+
+
+
+## DA-RNN
+
+A Dual-Stage Attention-Based Recurrent Neural Network for Time Series Prediction，Yao Qin et al.，2017，arXiv:1704.02971
+
+- contributions：用于机器翻译的序列模型无法用于多变量时间预测，因为其无法显式选择相关变量做预测，因此提出基于双阶段注意的递归神经网络；相比ARIMA，能建模非线性关系并区分多个外生序列；相比各类predefined非线性模型时间预测方法，能捕捉真正隐藏的非线性关系；计算出了各个外生序列的各个时间步对预测值的影响权重，考虑全面；
+
+- defect：为什么不用GRU，lstm能不能加上对前面预测值的误差修正
+
+- model：
+
+  任务：给定n个外生序列 $X=(x^1,x^2,...,x^n)^\top=(x_1,x_2,...,x_T)\in \R^{n\times T}$，$x^k=(x_1^k,...,x_T^k)^\top$代表一条长度为$T$的外生序列，$x_t=(x_t^1,...,x_t^n)^\top$代表$t$时刻的n个外生变量，做单步非线性预测：$\hat{y}_T=F(y_1,...,y_{T-1};x_1,...,x_T)$
+
+  实现：第一阶段选择基本刺激特征：在Encoder中引入了输入注意机制，可以自适应地选择相关的外生序列；第二阶段使用分类信息解码刺激：在Decoder中使用时间注意机制在所有时间步中自动选择相关Encoder隐藏状态
+
+  1. **Encoder with input attention**
+
+     Encoder本质是RNN，用来做输入序列到隐变量的映射：$\large h_t=f(h_{t-1},x_t)\in\R^{m\times 1}$；
+
+     先将n个外生序列和上一个LSTM单元的隐状态和细胞状态作为输入，输入到 Input attention Layer 中：$\large e_t^k=v_e^\top tanh(W_e[h_{t-1};s_{t-1}]+U_ex^k)$，其中$\large v_e^\top\in\R^{1\times T},W_e\in\R^{T\times 2m},U_e\in\R^{T\times T}$，即第k个序列在时刻t的权重由上一时刻隐变量和整个第k个序列决定
+
+     再做softmax，得到 t 时刻各变量的注意力权重：$\large \alpha_t^k=softmax(e_t^k)$
+
+     更新 t 时刻输入值：$\large \tilde{x}_t=(\alpha_t^1x_t^1,...,\alpha_t^nx_t^n)^\top$
+
+     用LSTM更新隐变量：$\large h_t=f(h_{t-1},\tilde{x}_t)$
+
+  2. **Decoder with temporal attention**
+
+     求得Encoder隐状态h后，计算Decoder的输入
+
+     Temporal attention Layer计算Encoder隐状态的权重：$\large l_t^i=v_d^\top tanh(W_d[d_{t-1};s'_{t-1}]+U_dh_i),1\leq i\leq T$，其中$\large v_d^\top\in\R^{1\times m},W_e\in\R^{m\times 2p},U_e\in\R^{m\times m}$，$\beta_t^i=softmax(l_t^i)$
+
+     再计算中间表示向量：$\large c_t=\sum_{i=1}^T \beta_t^ih_i$
+
+     将$c_t$与$y_{t-1}$合并作为Decoder输入：$\large \tilde{y}_t=\tilde{w}^\top[y_t;c_t]+\tilde{b}$，其中$\large [y_t;c_t]\in\R^{m+1},\tilde{w}^\top\in\R^{m+1},\tilde{b}\in\R$
+
+     将Decoder最后一个LSTM单元的隐状态作为预测值
+
+  <img src="Paper\DA-RNN.png" alt="image-20201229153523631"  />
+
+- experiment：SML 2010室温预测，NASDAQ 100股票预测
+
+  超参数：窗口T，Encoder隐状态维度m，Decoder隐状态维度p，T=10，m=p=64,128
+
+  模型：NARX RNN, Encoder-Decoder, Attention RNN, Input-Attn-RNN and DA-RNN
+
+  评价指标：RMSE，MAE，MAPE
   
+  有表，有可视化图，结果都明显达到SOTA
+  
+  为了研究DA-RNN内输入注意机制的有效性，以噪声外生序列作为输入进行了测试，将81个原始外生序列与81个噪声序列同时作为输入，图中显示能对噪声外生序列分配更小的权重，从而达到抑制效果；表明DA-RNN**对噪声输入具有鲁棒性**
+  
+  通过控制变量法比较DA-RNN与Input-Attn-RNN，得出DA-RNN比Input-Attn-RNN**对参数的鲁棒性**更强
+
+
+
+
+
+1. **将整个输入句子映射到向量：**N. Kalchbrenner and P . Blunsom. Recurrent continuous translation models. In EMNLP, 2013.
+2. A. Graves. Generating sequences with recurrent neural networks. In Arxiv preprint arXiv:1308.0850,
+    2013.
+3. A. Graves, S. Fern´ andez, F. Gomez, and J. Schmidhuber. Connectionist temporal classification: labelling
+    unsegmented sequence data with recurrent neural networks. In ICML, 2006.
+
+**时间序列预测：**
+
+1. ARMA：Hypothesis Testing in Time Series Analysis
+2. ARIMA：Arima models and the box-jenkins methodology.（不能建模非线性关系，也同等对待所有外生序列；只考虑目标序列季节性变化，忽略了驱动序列）
+3. NARX RNN：The use of NARX neural networks to predict chaotic time series.
+4. NARX长期依赖问题：Learning long-term dependencies in NARX recurrent neural networks
+5. NARX RNN：Narmax time series model prediction: feedforward and recurrent fuzzy neural network approaches
+6. NARX：Substructure vibration NARX neural network approach for statistical damage inference
+7. 核方法：Narx based nonlinear system identification using orthogonal least squares basis hunting
+8. 集成方法：Ensemble learning for time series prediction
+9. 高斯过程：Integrated pre-processing for bayesian nonlinear system identification with gaussian processes
+10. 分层注意网络：Hierarchical attention networks for document classifification. In *NAACL*, 2016（用于分类，不能选择相关外生序列进行预测）
+
+**应用：**
+
+1. 天气预测：Fine-grained photovoltaic output prediction using a bayesian ensemble
+2. 金融市场预测：Dynamic covariance models for multivariate financial time series
+3. 复杂动态系统分析：A regularized linear dynamical system framework for multivariate time series analysis
+
   
 
 
 
 # Attention
 
-## 提出Attention机制：Neural Machine Translation by Jointly Learning to Align and Translate
+## 提出Attention机制
 
-Bahdanau et al.，2015，ICLR，arXiv:1409.0473
+Neural Machine Translation by Jointly Learning to Align and Translate，Bahdanau et al.，2015，ICLR，arXiv:1409.0473
 
 - contributions：改进了经典Encoder-Decoder模型，将固定的一个中间表示向量，变成每个目标独有的中间表示向量，它们计算时使用的源单元的权重不同，因此具有注意力机制。在长序列的对齐上表现更好；鲁棒性更强；属于端到端的机器翻译方法，与基于短语（phrase-based，指不加任何神经网络组件的机器翻译方法）的统计机器翻译的翻译性能相媲美
 
-  - defect：结构混乱background->...->related work；没有解决集外词；只用了BiRNN+Attention，没有尝试其他结构与Attention结合，没有挖掘到Attention的本质；只使用了单一数据集
+- defect：结构混乱background->...->related work；没有解决集外词；只用了BiRNN+Attention，没有尝试其他结构与Attention结合，没有挖掘到Attention的本质；只使用了单一数据集
 
 - model：
 
   RNNsearch：BiRNN+Attention
 
   ![image-20201222195613205](Paper\BiRNN+Attention.png)
-  $$
-  Attention(Query,Source)=\sum_{i=1}^{L_x}Similarity(Query,Key_i)*Value_i\\
-  1.Similarity:Sim_{点积}=Query\cdot Key_i\quad Sim_{cosine}=\cfrac{Query\cdot Key_i}{||Query||\cdot ||Key_i||}\quad Sim_{MLP}=MLP(Query,Key_i)\\
-  2.\alpha_i=softmax(Sim_i)=\cfrac{exp(Sim_i)}{\sum_{k=1}^{T_x}exp(Sim_i)}\\
-  3.Attention(Query,Source)=\sum_{i=1}^{L_x}\alpha_i*Value_i
-  $$
   
 - experiment：ACL WMT ’14英法基准系统，与RNNencdec，Moses(phrase-based SOTA)比较
 
   使用BLUE得分，结果显示最差时刻优于RNNencdec，最好时刻优于Moses
 
-## **CNN+Attention：**Convolutional Sequence to Sequence Learning
+## CNN+Attention
 
-Facebook AI Research，2017，ICML，arXiv:1705.03122
+Convolutional Sequence to Sequence Learning，Facebook AI Research，2017，ICML，arXiv:1705.03122
 
 - contributions：使用CNN，通过卷积的叠加可以精确地控制上下文的长度，因为卷积之间的叠加可以通过公式直接计算出感受野是多少；大幅度增加并行；门控线性单元简化了梯度传播；具备残差连接，能具有足够深的层数；对于输入的一个单词而言，输入CNN网络，所经过的卷积核和非线性计算数量都是固定的，有助于训练
 
-- defect：
+- defect：可以应用于TCN以改进感受野计算式
 
 - model：
 
@@ -194,11 +346,11 @@ Facebook AI Research，2017，ICML，arXiv:1705.03122
   中左attention部分：把decoder和encoder的输出做点乘，做为输入源语言（英语）sequence中每个词权重
   中右Residualconnection：把attention计算的权重与输入序列相乘，加入到decoder的输出中输出输出序列
 
-  - experiment：three major WMT translation tasks,
+- experiment：three major WMT translation tasks,
 
-## 实现了完全基于注意力机制的Transformer架构：Attention is All You Need
+## 实现了完全基于注意力机制的Transformer架构
 
-Google AI Research，2017，arXiv:1706.03762
+Attention is All You Need，Google AI Research，2017，arXiv:1706.03762
 
 https://jalammar.github.io/illustrated-transformer/
 
@@ -274,11 +426,12 @@ https://jalammar.github.io/illustrated-transformer/
 
 ![image-20201226145413015](Paper\Transformer.png)
 
-- dataset：WMT 2014 English-German，WMT 2014 English-French
+- experiment：WMT 2014 English-German，WMT 2014 English-French
 
 
 
-A Simple Neural Attentive Meta-Learner，Mishra et al.，2017，ICLR，arxiv:1707.03141
+1. A Simple Neural Attentive Meta-Learner，Mishra et al.，2017，ICLR，arxiv:1707.03141
+2. 人类注意力机制：A dual-stage two-phase model of selective attention
 
 
 
