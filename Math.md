@@ -21,18 +21,6 @@ $K$为标签数，$d$为特征数，$K_i$为$X_i$的类别数，$N$为样本数�
   - **交叉熵**：$H(P,Q)=-\sum_iP(x_i)lnQ(x_i)$ ，KL散度中前一部分P的熵不变，可使用交叉熵代替均方误差等作为loss函数，表示两个概率分布之间的距离
   - **基尼指数**：$Gini(p)=\sum_{k=1}^Kp_k(1-p_k)=1-\sum_{k=1}^Kp_k^2，K为类别数;二分类Gini(p)=2p_1p_2$；数据集被条件（$特征Ai==a$）划分为两个子集，则  $Gini(D,Ai)=p_{D_1}Gini(D_1)+p_{D_2}Gini(D_2)$  （**2分类只有1种分类方法，n分类有n种分类方法**）
 
-+ **监督式降维**
-
-  在二维平面上，要求把点投影到一条直线上，直线的方向向量为$w$，则点X投影点到原点的距离为$w^TX$，假设只有两个类别0、1，降维后，希望同类别投影点近（协方差小），不同类别投影点远（中心距离大），即：
-  $$
-  记第i类:集合X_i\quad均值向量\mu_i\quad协方差矩阵\Sigma_i\quad中心投影距离w^T\mu_i\quad投影点协方差w^T\Sigma_iw\\
-  最大化目标：J=\cfrac{||w^T\mu_0-w^T\mu_1||_2^2}{w^T\Sigma_0w+w^T\Sigma_1w}=
-  \cfrac{w^T(\mu_0-\mu_1)(\mu_0-\mu_1)^Tw}{w^T(\Sigma_0+\Sigma_1)w}\\
-  定义\quad类间散度矩阵：S_b=(\mu_0-\mu_1)(\mu_0-\mu_1)\quad 类内散度矩阵：S_w=\Sigma_0+\Sigma_1\\
-  则：J=\cfrac{w^TS_bw}{w^TS_ww}\\
-  解得：w^*=s_W^{-1}(\mu_0-\mu_1)
-  $$
-
 + **EM算法**
 
   用于含有隐变量的概率模型参数的极大似然估计
@@ -367,7 +355,9 @@ $d_k$为**下降方向**的充分条件：$\large \exist\,\bar{\alpha},\,\forall
 
 - Wolfe准则
 
+  给定$\rho\in(0,0.5),\sigma\in(\rho,0.5)$，找到满足不等式的$\alpha_k$：$f(x_k+\alpha_kd_k)\leqslant f(x_k)+\rho\alpha_kg_k^\top d_k,\quad g(x_{k+1})^\top d_k\geqslant\sigma g_k^\top d_k$
 
+  
 
 ## 牛顿法
 

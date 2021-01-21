@@ -398,7 +398,7 @@ model.fit(X, Y.ravel())
 
 **函数间隔**：样本点 $\large \hat{\gamma_i}=y_i(w·x+b)，$超平面 $\large \hat{\gamma}=\min\hat{\gamma_i}$，表示分类的正确性
 
-**几何间隔**：$\large \gamma = \cfrac{1}{||w||}\hat{\gamma}$，表示点与超平面距离
+**几何间隔**：$\large \gamma = \cfrac{1}{||w||}\hat{\gamma}$，表示点与超平面距离（$f(X)=W^\top X+b=W^\top(X_p+r\cfrac{W}{||W||})+b=W^\top X_p+b+r\cfrac{W^\top W}{||W||}=r||W||$）
 
 ![image-20200629225442920](..\svm向量基础.png)
 
@@ -890,7 +890,7 @@ plt.show()
 
   - **贝叶斯估计(Bayesian Estimation)**
 
-    贝叶斯学派，认为估计参数是未观察到的随机变量，也有概率分布。可假定一个先验分布 $p(\theta)$，计算条件分布 $p(X|\theta)=\sum_{i=1}^Np(x_i|\theta)$，再计算后验分布 $p(\theta|X)$，得贝叶斯估计量为：$\hat\theta=\int \theta\cdot p(\theta|X)d\theta$。当样本数足够大时，两种的参数估计值相同，当样本小且参数先验分布较准确时，贝叶斯估计较准确。
+    贝叶斯学派，认为估计参数是未观察到的随机变量，也有概率分布。可假定一个先验分布 $p(\theta)$，计算条件分布 $p(X|\theta)=\prod_{i=1}^Np(x_i|\theta)$，再计算后验分布 $p(\theta|X)$，得贝叶斯估计量为：$\hat\theta=\int \theta\cdot p(\theta|X)d\theta$。当样本数足够大时，两种的参数估计值相同，当样本小且参数先验分布较准确时，贝叶斯估计较准确。
 
 - 非参数估计：概率密度函数的形式未知，直接估计概率密度函数的方法
 
@@ -1045,54 +1045,102 @@ def trainModel(trainData, testData, testDocs, docs):
 
 与朴素贝叶斯相比，允许变量间存在关系
 
-+ **线性判别分析（LinearDiscriminantAnalysis，LDA）**
+### 线性判别函数
 
-  只能处理连续型变量，$X|y=0\sim N(\mu_0,\Sigma)$，$X|y=1\sim N(\mu_1,\Sigma)$，$P(y=0)=\theta_0$，$P(y=1)=\theta_1$
+- 单线基准
 
-  模型要求：
+  $d_i(X)=W_i^\top X$，共$M$个函数
 
-  1. 变量服从正态分布，因此要连续；
-  2. 对于不同类别，自变量协方差一样，只是期望不一样，只关心各类别中心位置；
-  3. 协方差$\Sigma$是对角矩阵时，变量相互独立
+  当$d_i(X)>0,d_{j\not=i}(X)<0$时，可判定样本属于第 i 类；当 $d_i(X)>0$多于一个时，为不确定区
 
-  参数估计：
+- 多线基准
 
-  1. $\theta_l$：等于各类别在训练数据中的占比
-  2. $\mu_l$：等于训练数据里各类别的平均值
-  3. $\Sigma$：等于各类别内部协方差的加权平均，权重为类别内数据的个数
+  $d_{ij}(X)=W_{ij}^\top X,\quad d_{ji}(X)=-d_{ij}(X)$，共$M(M-1)/2$个函数
 
-  LDA的预测公式与逻辑回归的一样，在满足模型要求时，往往生成式模型效果更好
+  当$d_{ij}(X)>0,j\not=i$时，可判定样本属于第 i 类；当存在 $d_{ij}(X)<0$多于一个时，为不确定区；
 
-  LDA可以用作降维，$\mu_l$与降维理论中$\mu_l$一样，$\Sigma$与降维理论中$\cfrac{1}{m}s_W$一样
+  相比第一种，线性可分的可能性要更大一些
 
-  ```python
-  from sklearn import datasets
-  from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
-  # 生成数字集
-  digits = datasets.load_digits()
-  X = digits.data
-  y = digits.target
-  #输入降维后的维度进行降维
-  model = LinearDiscriminantAnalysis(n_components=3)
-  model.fit(X, y)
-  newX = model.transform(X)
-  ```
+- 多线基准特例
 
-  **优点：**
+  $d_{ij}(X)=d_i(X)-d_j(X),\quad d_i(X)=W_i^\top X$，共$M$个函数
 
-  - 相比较 PCA，LDA 更加擅长处理带有类别信息的数据；
-  - 线性模型对噪声的鲁棒性比较好，LDA 是一种有效的降维方法。
+  当$d_i(X)>d_j(X),j\not=i$时，可判定样本属于第 i 类
 
-  **缺点：**
+  除边界外没有不确定区
 
-  - LDA对**数据的分布做出了很强的假设**，比如每个类别数据都是高斯分布、各个类的协方差相等。这些假设在实际中不一定完全满足。
-  - LDA**模型简单，表达能力有一定局限性**，但这可以通过引入**核函数**拓展 LDA 来处理分布比较复杂的数据。
 
-+ **二次判别分析（QuadraticDiscriminantAnalysis，LDA）**
 
-  不要求自变量分布的协方差矩阵一样，但无降维功能，当协方差矩阵为对角矩阵时，二次判别变成高斯模型
+**广义线性判别函数**
 
-  调用GaussianNB或QuadraticDiscriminantAnalysis建模
+$Y^*=[f_1(X^*),f_2(X^*),...,f_k(X^*),1]^\top$，$d(Y)=W^\top Y^*$
+
+存在的问题：1. 非线性变换可能非常复杂 2. 维数大大增加： 维数灾难
+
+
+
+### 线性判别分析（Fisher Linear Discriminant Analysis，LDA）
+
+在二维平面上，要求把点投影到一条直线上，直线的**方向向量为$w$**，则点X的投影点为$w^TX$，假设只有两个类别0、1，降维后，希望同类别投影点近（协方差小），不同类别投影点远（中心距离大），即：
+$$
+\large{
+记第i类:集合X_i\quad均值向量\mu_i=\cfrac{1}{||D_i||}\sum_jx_j\quad协方差矩阵\Sigma_i=\sum_j(x_j-\mu_i)(x_j-\mu_i)^\top\quad\\
+各投影点的均值\tilde{\mu}_i=w^\top\mu_i\quad投影点类内协方差\tilde{\Sigma}_i=w^\top\Sigma_iw\\
+最大化目标：J=\cfrac{(\tilde{\mu_0}-\tilde{\mu_1})^2}{\tilde{\Sigma}_0+\tilde{\Sigma}_1}=\cfrac{||w^\top\mu_0-w^\top\mu_1||_2^2}{w^\top\Sigma_0w+w^\top\Sigma_1w}=\cfrac{w^\top(\mu_0-\mu_1)(\mu_0-\mu_1)^\top w}{w^\top(\Sigma_0+\Sigma_1)w}=\cfrac{\tilde{S}_b}{\tilde{S}_w}\\
+定义\quad类间散度矩阵：S_b=(\mu_0-\mu_1)(\mu_0-\mu_1)^\top\quad 类内散度矩阵：S_w=\Sigma_0+\Sigma_1\\
+则：J=\cfrac{w^\top S_bw}{w^\top S_ww}\\
+解得：w^*=S_w^{-1}(\mu_0-\mu_1)\\
+分割阈值：y_0=\cfrac{||D_0||\tilde{\mu}_0+||D_1||\tilde{\mu}_1}{||D_0||+||D_1||}
+}
+$$
+只能处理连续型变量，$X|y=0\sim N(\mu_0,\Sigma)$，$X|y=1\sim N(\mu_1,\Sigma)$，$P(y=0)=\theta_0$，$P(y=1)=\theta_1$
+
+模型要求：
+
+1. 变量服从正态分布，因此要连续；
+2. 对于不同类别，自变量协方差一样，只是期望不一样，只关心各类别中心位置；
+3. 协方差$\Sigma$是对角矩阵时，变量相互独立
+
+参数估计：
+
+1. $\theta_l$：等于各类别在训练数据中的占比
+2. $\mu_l$：等于训练数据里各类别的平均值
+3. $\Sigma$：等于各类别内部协方差的加权平均，权重为类别内数据的个数
+
+LDA的预测公式与逻辑回归的一样，在满足模型要求时，往往生成式模型效果更好
+
+LDA可以用作降维，$\mu_l$与降维理论中$\mu_l$一样，$\Sigma$与降维理论中$\cfrac{1}{m}s_W$一样
+
+```python
+from sklearn import datasets
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+# 生成数字集
+digits = datasets.load_digits()
+X = digits.data
+y = digits.target
+#输入降维后的维度进行降维
+model = LinearDiscriminantAnalysis(n_components=3)
+model.fit(X, y)
+newX = model.transform(X)
+```
+
+**优点：**
+
+- 相比较 PCA，LDA 更加擅长处理带有类别信息的数据；
+- 线性模型对噪声的鲁棒性比较好，LDA 是一种有效的降维方法。
+
+**缺点：**
+
+- LDA对**数据的分布做出了很强的假设**，比如每个类别数据都是高斯分布、各个类的协方差相等。这些假设在实际中不一定完全满足。
+- LDA**模型简单，表达能力有一定局限性**，但这可以通过引入**核函数**拓展 LDA 来处理分布比较复杂的数据。
+
+
+
+### 二次判别分析（Quadratic Discriminant Analysis，QDA）
+
+不要求自变量分布的协方差矩阵一样，但无降维功能，当协方差矩阵为对角矩阵时，二次判别变成高斯模型
+
+调用GaussianNB或QuadraticDiscriminantAnalysis建模
 
 
 
