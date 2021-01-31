@@ -162,7 +162,7 @@ Neural Machine Translation by Jointly Learning to Align and Translate，Bahdanau
 
 - contributions：改进了经典Encoder-Decoder模型，将固定的一个中间表示向量，变成每个目标独有的中间表示向量，它们计算时使用的源单元的权重不同，因此具有注意力机制。在长序列的对齐上表现更好；鲁棒性更强；属于端到端的机器翻译方法，与基于短语（phrase-based，指不加任何神经网络组件的机器翻译方法）的统计机器翻译的翻译性能相媲美
 
-- defect：结构混乱background->...->related work；没有解决集外词；只用了BiRNN+Attention，没有尝试其他结构与Attention结合，没有挖掘到Attention的本质；只使用了单一数据集
+- defect：没有解决集外词；只用了BiRNN+Attention，没有尝试其他结构与Attention结合，没有挖掘到Attention的本质；只使用了单一数据集
 
 - model：
 
@@ -335,6 +335,8 @@ https://jalammar.github.io/illustrated-transformer/
 
 **时间序列的多变量多步预测**
 
+非线性自回归外生(NARX)模型
+
 长时间依赖问题；
 
 外生变量使用时可以用到未来值，预测变量不可以；
@@ -366,7 +368,7 @@ A Dual-Stage Attention-Based Recurrent Neural Network for Time Series Prediction
 - contributions：用于机器翻译的序列模型无法用于多变量时间预测，因为其无法显式选择相关变量做预测，因此提出基于双阶段注意的递归神经网络；相比ARIMA，能建模非线性关系并区分多个外生序列；相比各类predefined非线性模型时间预测方法，能捕捉真正隐藏的非线性关系；计算出了各个外生序列的各个时间步对预测值的影响权重，考虑全面；
 
 - defect：为什么不用GRU，lstm能不能加上对前面预测值的误差修正（In another way, it still does not make good use of the correlation between the driver series and the target series. For example, when we predict the network flow as the target value, we also conclude the relationship between the 
-  target value and other driving attributes (such as the click rate, jump rate, page stay time or other attributes) which also contain some information for prediction. In the process of realtime data prediction, the driving series at time T cannot be provided for predicting the target value at the same time T, which is the necessity for the DARNN model.）无法多步预测，误差大
+  target value and other driving attributes (such as the click rate, jump rate, page stay time or other attributes) which also contain some information for prediction. In the process of real-time data prediction, the driving series at time T cannot be provided for predicting the target value at the same time T, which is the necessity for the DARNN model.）无法多步预测，误差大
 
 - model：
 
