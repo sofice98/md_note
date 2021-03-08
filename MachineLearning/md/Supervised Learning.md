@@ -89,13 +89,13 @@ y=(y_1,y_2,...,y_m)^T\\
 y=X\hat{w}^T
 }
 $$
-这里采用平方误差求最优$\hat{w}$： $\large f(\hat{w})=\sum_{i=1}^m(y_i-x_i^T\hat{w})^2$
+这里采用平方误差求最优$\hat{w}$： $\large E_\hat{w}=\sum_{i=1}^m(y_i-x_i^T\hat{w})^2$
 
-对于上述式子$f(\hat{w})$可以通过梯度下降等方法得到最优解。但是使用矩阵表示将会使求解和程序更为简单：$\large f(\hat{w})=(y-X\hat{w})^T(y-X\hat{w})$
+对于上述式子$f(\hat{w})$可以通过梯度下降等方法得到最优解。但是使用矩阵表示将会使求解和程序更为简单：$\large E_\hat{w}=(y-X\hat{w})^T(y-X\hat{w})$
 
-将$f(\hat{w})$对$\hat{w}$求导可得：$\large \cfrac{\partial f(\hat{w})}{\partial \hat{w}}=2X^T(X\hat{w}-y)$
+将$f(\hat{w})$对$\hat{w}$求导可得：$\large \cfrac{\partial E_\hat{w}}{\partial \hat{w}}=2X^T(X\hat{w}-y)$
 
-当$X^TX$为满秩矩阵或正定矩阵时，使上式等于0，便可得到：$\large \hat{w}=(X^TX)^{-1}X^Ty$
+当$X^TX$为满秩矩阵或正定矩阵时，使上式等于0，便可得到：$\large \hat{w}=(X^TX)^{-1}X^Ty$，即非线性最小二乘问题的高斯牛顿法步
 
 实际中，$X^TX$往往不是满秩矩阵，此时可引入正则化项
 
@@ -295,17 +295,17 @@ $\large w^{(i)} = \exp \left( - \dfrac{\left(\mathbf{x}^{(i)} - \mathbf{x}\right
 
 无需事先假设数据分布，可以得到近似概率预测，有利于需要利用概率辅助决策的任务
 
-考虑用广义线性模型：$y=g^{-1}(w^Tx+b)$解决分类问题，此时联系函数为单位阶跃函数，用对数几率函数替代：$y=\cfrac{1}{1+e^{-(w^Tx+b)}}$，也即：$ln\cfrac{y}{1-y}=w^Tx+b$，将y视为后验概率估计，则可重写为$ln\cfrac{P(y=1|x)}{P(y=0|x)}=w^Tx+b$，其中$\cfrac{P}{1-P}$为**事件发生比**（odds）
+考虑用广义线性模型：$y=g^{-1}(w^Tx+b)$解决分类问题，此时联系函数为单位阶跃函数，但其不连续，    用对数几率函数替代：$y=\cfrac{1}{1+e^{-(w^Tx+b)}}$，也即：$ln\cfrac{y}{1-y}=w^Tx+b$，将y视为后验概率估计，则可重写为$ln\cfrac{P(y=1|x)}{P(y=0|x)}=w^Tx+b$，其中$\cfrac{P}{1-P}$为**事件发生比**（odds）
 
 模型认为观察得到的结果由正效用$P(y=1|x)$和负效用$P(y=0|x)$确定（称为隐含变量）
 
 显然有**对数几率回归模型**：$P(y=1|x)=\cfrac{ e^{(w^Tx+b)}}{1+e^{(w^Tx+b)}}=\pi(x)，P(y=0|x)=\cfrac{1}{1+e^{(w^Tx+b)}}=1-\pi(x)$
 
-似然函数为：$\prod_{i=1}^N[\pi(x_i)]^{y_i}[1-\pi(x_i)]^{1-y_i}$，定义广义参数：$\beta=(w_1,...,w_n;b)^T$
+似然函数为：$\large \prod_{i=1}^N[\pi(x_i)]^{y_i}[1-\pi(x_i)]^{1-y_i}$，定义广义参数：$\beta=(w_1,...,w_n;b)^T$
 
-**损失函数**： $\large L(w)=\sum_{i=1}^N[y_iln\pi(x_i)+(1-y_i)ln(1-\pi(x_i)]=\sum_{i=1}^N[y_i(\beta^Tx_i)-ln(1+e^{(\beta^Tx_i+b)}]$
+似然函数取对数作为**损失函数**： $\large L(w)=\sum_{i=1}^N[y_iln\pi(x_i)+(1-y_i)ln(1-\pi(x_i)]=\sum_{i=1}^N[y_i\beta^Tx_i-ln(1+e^{\beta^Tx_i})]$
 
-可使用改进的迭代尺度法或拟牛顿法解决最大熵最优化问题
+可使用改进的迭代尺度法或牛顿法解决最大熵最优化问题
 
 <img src="..\逻辑函数近似.png" alt="image-20200611103957090" style="zoom:80%;" />
 
@@ -394,25 +394,25 @@ model.fit(X, Y.ravel())
 
 ## 支持向量机(Support Vector Machines,SVM)
 
-如图，空间中的直线可以用一个线性方程来表示：$w·x+b=0$ ，w为法向量，法向量指向一侧为正类
+如图，空间中的直线可以用一个线性方程来表示：$f(x)=w^\top x+b=0$ ，w为法向量，法向量指向一侧为正类
 
 **函数间隔**：样本点 $\large \hat{\gamma_i}=y_i(w·x+b)，$超平面 $\large \hat{\gamma}=\min\hat{\gamma_i}$，表示分类的正确性
 
 **几何间隔**：$\large \gamma = \cfrac{1}{||w||}\hat{\gamma}$，表示点与超平面距离（$f(X)=W^\top X+b=W^\top(X_p+r\cfrac{W}{||W||})+b=W^\top X_p+b+r\cfrac{W^\top W}{||W||}=r||W||$）
 
-![image-20200629225442920](..\svm向量基础.png)
+<img src="..\svm向量基础.png" alt="image-20200629225442920" style="zoom:80%;" />
 
 **硬间隔最大化**
 
 原始问题为：
 $$
 \large{
-\max_{w,b}\hat{\gamma}/||w||\\
-s.t.\quad y_i(w·x_i+b)\geqslant\hat{\gamma}
+\max_{w,b}\cfrac{2}{||w||}\\
+s.t.\quad y_i(w·x_i+b)\geqslant1
 }
 $$
 
-函数间隔取值不影响最优化问题的解，取 $\hat{\gamma}=1$，并对损失函数作等价替换：
+等价替换：
 $$
 \large{
 \min_{w,b}\frac12||w||^2\\
@@ -420,8 +420,6 @@ s.t.\quad y_i(w·x_i+b)-1\geqslant0
 }
 $$
 此时演变成一个**凸二次规划问题**，分类决策函数为$f(x)=sign(w^*·x+b^*)$
-
-![image-20200629232128776](..\svm原理1.png)
 
 
 

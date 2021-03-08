@@ -1,6 +1,60 @@
+$K$为标签数，$d$为特征数，$K_i$为$X_i$的类别数，$N,n$为样本数，$D$为数据集，$D_c$为数据子集
+
+# 聚类
+
+样本集合用矩阵$X=[x_{ij}]$表示，$x_{ij}$代表第 j 个样本的第 i 个特征
+
+**聚类距离**
+
+- 闵可夫斯基距离
+
+  $\large d_{ij}=(\sum_{k=1}^d|x_{ki}-x_{kj}|^p)^{\frac1p},p\geqslant 1$，$p=$1为曼哈顿距离，$p=2$为欧氏距离，$p=\infin$为切比雪夫距离（取各个坐标数值差的绝对值的最大值）
+
+- 马哈拉诺比斯距离
+
+  考虑各特征的相关性并与各特征尺度无关，$\large d_{ij}=[(x_i-x_j)^TS^{-1}(x_i-x_j)]^{\frac12}$，$S$ 为 $X$ 的协方差矩阵，$\large x_i=(x_{1i},x_{2i},...,x_{di})^\top$
+
+- 相关系数
+
+  $\large r_{ij}=\cfrac{\sum_{k=1}^m (x_{ki}-\bar{x}_i)(x_{kj}-\bar{x}_j)} {[\sum_{k=1}^m (x_{ki}-\bar{x}_i)^2\sum_{k=1}^m (x_{kj}-\bar{x}_j)^2]^\frac{1}{2}}$
+
+- 夹角余弦
+
+  $\large s_{ij}=\cfrac{\sum_{k=1}^m x_{ki}x_{kj}} {[\sum_{k=1}^m x_{ki}^2\sum_{k=1}^m x_{kj}^2]^\frac{1}{2}}$
+
+**类（簇）**
+
+$n_G$表示类G中样本个数，$d_{ij}$表示样本$x_i$与样本$x_j$之间的距离
+
+判定属同类：T为给定正数，若集合G中任意两个样本$x_i,x_j$的距离$d_{ij}\leqslant T$，则G为一个类
+
+类的特征： 
+
+1. 均值（中心）：$\bar{x}_G=\cfrac{1}{n_G}\sum_{i=1}^{n_G} x_i$
+
+2. 直径：$D_G=\max\,d_{ij}$
+
+3. 样本散布矩阵：$A_G=\sum_{i=1}^{n_G}(x_i-\bar{x}_G)(x_i-\bar{x}_G)^\top$ 
+
+   样本协方差矩阵：$S_G=\cfrac{1}{m-1}A_G$
 
 
-# k均值(k-Means)
+
+
+
+
+
+
+
+
+
+
+
+
+
+## 层次聚类
+
+## k均值(k-Means)
 
 
 

@@ -89,6 +89,16 @@ cudnn7.6
 
 
 
+# MySQL
+
+安装配置：https://www.cnblogs.com/winton-nfs/p/11524007.html
+
+
+
+# JAVA
+
+IDE安装配置：https://www.aiweibk.com/120661.html
+
 
 
 # csgo

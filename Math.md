@@ -45,20 +45,8 @@ $K$为标签数，$d$为特征数，$K_i$为$X_i$的类别数，$N$为样本数�
   具有分布概率:P(y|\theta)=\sum_{k=1}^K\alpha_k\phi(y|\theta_k)\\
   \alpha_k\geqslant0,\sum_{k=1}^K\alpha_k=1;\quad \phi(y|\theta_k)是高斯分布密度，\theta_k=（\mu_k,\sigma_k^2）
   $$
+  
 
-+ **聚类距离**
-
-  - 闵可夫斯基距离
-
-    $d_{ij}=(\sum_{k=1}^m|x_{ki}-x_{kj}|^p)^{\frac1p},p\geqslant 1$，$p=$1为曼哈顿距离，$p=2$为欧氏距离，$p=\infin$为切比雪夫距离（取各个坐标数值差的绝对值的最大值）
-
-  - 马哈拉诺比斯距离
-
-    $d_{ij}=[(x_i-x_j)^TS^{-1}(x_i-x_j)]^{\frac12}$，S 为 X 的协方差矩阵
-
-  - 相关系数
-
-  - 夹角余弦
 
 - **前向分步算法**
 
@@ -155,6 +143,8 @@ $\large \forall x,y\in D,\forall \lambda\in[0,1],\lambda x+(1-\lambda)y\in D$，
 半正定矩阵：给定一个大小为$n\times n$的实对称矩阵A，若对于任意长度为 n 的非零向量 $x$，有 $x^\top Ax\geqslant0$ 恒成立，则矩阵 A 为半正定矩阵
 
 一致正定矩阵：给定一个大小为$n\times n$的实对称矩阵A，若存在常数$c>0$，使得对于任意长度为 n 的非零向量 $x$，有 $x^\top Ax\geqslant c||h||^2$ 恒成立，则矩阵 A 为一致正定矩阵
+
+
 
 # 应用随机过程
 
@@ -323,6 +313,8 @@ $d_k$为**下降方向**的充分条件：$\large \exist\,\bar{\alpha},\,\forall
 
 ## 线搜索技术
 
+求解步长
+
 令$\phi(\alpha)=f(x_k+\alpha d_k)$，通过搜索确定$\alpha_k$，使得 $\phi(\alpha_k)<\phi(0)$
 
 
@@ -361,13 +353,17 @@ $d_k$为**下降方向**的充分条件：$\large \exist\,\bar{\alpha},\,\forall
 
 ## 牛顿法
 
+求解无约束最优化问题的更新量
+
 **最速下降法（梯度下降法, GD）**
 
 取方向$d_k=-g_k$，由线搜索技术确定步长因子$\alpha_k$，更新：$x_{k+1}=x_k+\alpha_kd_k$
 
 收敛方向为锯齿状，最好时线性收敛
 
-当每次只是用一个误分类的样本进行更新时，称为**随机梯度下降法(SGD)**，更新过后以前的误分类点可能会正确分类
+迭代若干次，每次使用全部样本计算步长
+
+当每次只是用一个样本进行更新时，称为**随机梯度下降法(SGD)**
 
 
 
@@ -392,6 +388,10 @@ $d_k$为**下降方向**的充分条件：$\large \exist\,\bar{\alpha},\,\forall
 **拟牛顿法**
 
 使用另一个矩阵近似海森矩阵以简化计算量
+
+记$y_k=g_{k+1}-g_k,\delta_k=x_{k+1}-x_k$，则有拟牛顿条件$\delta_k=G_k^{-1}y_k$
+
+有DFP算法，BFGS算法，Broyden类算法
 
 
 
