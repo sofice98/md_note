@@ -205,7 +205,7 @@ res = model.fit_regularized(alpha=alpha)
 
 下图为$\alpha$改变时三个参数的变化规律
 
-![image-20200604222642765](..\惩罚项.png)
+![image-20200604222642765](..\Resources\惩罚项.png)
 
 + 前向逐步回归：贪心，开始所有权重设为1，每一步对某个权重增加或减少一个值，迭代若干次即可收敛得到超参数
 
@@ -283,7 +283,7 @@ $\large w^{(i)} = \exp \left( - \dfrac{\left(\mathbf{x}^{(i)} - \mathbf{x}\right
 
 普通的回归分析，只得到y的期望；分位数回归，可以探索y的完整分布状况
 
-![image-20201112164901096](..\分位数回归.png)
+![image-20201112164901096](..\Resources\分位数回归.png)
 
 分别取多个分位点[0,1]来进行回归拟合，得到若干条回归线（例：分位点0.9，得到的回归线下方有90%的数据点）
 
@@ -307,7 +307,7 @@ $\large w^{(i)} = \exp \left( - \dfrac{\left(\mathbf{x}^{(i)} - \mathbf{x}\right
 
 可使用改进的迭代尺度法或牛顿法解决最大熵最优化问题
 
-<img src="..\逻辑函数近似.png" alt="image-20200611103957090" style="zoom:80%;" />
+<img src="..\Resources\逻辑函数近似.png" alt="image-20200611103957090" style="zoom:80%;" />
 
 
 
@@ -400,7 +400,7 @@ model.fit(X, Y.ravel())
 
 **几何间隔**：$\large \gamma = \cfrac{1}{||w||}\hat{\gamma}$，表示点与超平面距离（$f(X)=W^\top X+b=W^\top(X_p+r\cfrac{W}{||W||})+b=W^\top X_p+b+r\cfrac{W^\top W}{||W||}=r||W||$）
 
-<img src="..\svm向量基础.png" alt="image-20200629225442920" style="zoom:80%;" />
+<img src="..\Resources\svm向量基础.png" alt="image-20200629225442920" style="zoom:80%;" />
 
 **硬间隔最大化**
 
@@ -441,7 +441,7 @@ s.t.\quad \sum_{i=1}^N\alpha_iy_i=0, \quad 0\leqslant\alpha_i\leqslant C
 $$
 事实上是寻找与被测数据相似的训练数据，并将相应的因变量加权平均得到最后的预测值。只有在虚线上或虚线内的点权重才不为0，其他点权重都为0：
 
-<img src="..\svm支持向量.png" alt="image-20200622181820083" style="zoom:50%;" />
+<img src="..\Resources\svm支持向量.png" alt="image-20200622181820083" style="zoom:50%;" />
 
 引入合页损失函数（取正值）后，可将上述原始最优化问题等价为：
 $$
@@ -453,7 +453,7 @@ $$
 
 其中超参数 C 是模型预测损失的权重，C 越大表示模型越严格，margin越小，考虑的点越少，称为**hard margin**，C越小考虑的点越多，称为**soft margin**
 
-<img src="..\svm超参数.png" alt="image-20200615221059133" style="zoom:60%;" />
+<img src="..\Resources\svm超参数.png" alt="image-20200615221059133" style="zoom:60%;" />
 
 **核函数**
 
@@ -473,7 +473,7 @@ $$
 
 实际应用中，可以用网格搜寻的办法找到最合适的核函数
 
-<img src="..\常用核函数.png" alt="image-20200622182951633" style="zoom:67%;" />
+<img src="..\Resources\常用核函数.png" alt="image-20200622182951633" style="zoom:67%;" />
 
 **序列最小最优化算法（SMO）**
 
@@ -493,7 +493,7 @@ $$
 
 使用SVM模型，容忍f(x)与y之间最多有$\epsilon$的偏差
 
-![image-20200630193740226](..\svr.png)
+![image-20200630193740226](..\Resources\svr.png)
 
 ```python 
 from sklearn.svm import SVC
@@ -760,17 +760,17 @@ dtProb = dtModel.predict_proba(testData[features])[:, 1]
 
   随机来源及scikit-learn函数如下：
 
-  <img src="..\随机森林.png" alt="image-20200623110624949" style="zoom: 67%;" />
+  <img src="..\Resources\随机森林.png" alt="image-20200623110624949" style="zoom: 67%;" />
 
 + **随机森林高维映射（Random Forest Embedding）**
 
   可以将随机森林当作非监督式学习使用，随机抽取特征组合成合成数据，与原始数据一起进行决策树训练。当分类结果误差较小时，说明各变量间的相关关系比较强烈
 
-  <img src="..\rfe.png" alt="image-20200623111544046" style="zoom:50%;" />
+  <img src="..\Resources\rfe.png" alt="image-20200623111544046" style="zoom:50%;" />
 
   使用随机森林将低维数据映射到高维后，可以与其他模型联结：
 
-  <img src="..\rfe2.png" alt="image-20200623111941192" style="zoom:55%;" />
+  <img src="..\Resources\rfe2.png" alt="image-20200623111941192" style="zoom:55%;" />
 
 ```python
 from sklearn.ensemble import RandomTreesEmbedding
@@ -810,7 +810,7 @@ plt.show()
 
 分类器$h_i$与$h_j$的预测结果列联表为：
 
-![image-20200707125217670](..\分类器列联表.png)
+![image-20200707125217670](..\Resources\分类器列联表.png)
 
 给出常见多样性度量：
 
@@ -908,13 +908,13 @@ plt.show()
 
 贝叶斯网表示：$B=<G,\Theta>$，$G$描述一个有向无环图，$\Theta$包含每个属性的条件 $\theta_{x_i|\pi_i}=P_B(x_i|\pi_i)$，$\pi_i$ 为 $x_i$ 的父节点集，不相连的属性独立：$P_B(x_1,x_2,...,x_d)=\prod_{i=1}^dP_B(x_i|\pi_i)$
 
-![image-20201125150911739](..\贝叶斯网.png)
+![image-20201125150911739](..\Resources\贝叶斯网.png)
 
 图中：$P(x_1,x_2,x_3,x_4,x_5)=P(x_1)P(x_2)P(x_3|x_1)P(x_4|x_1,x_2)P(x_5|x_2)$，给定$x_1$时$x_3,x_4$独立，给定$x_2$时$x_4,x_5$独立，分别记为：$x_3\bot x_4|x_1$，$x_4\bot x_5|x_2$
 
 **贝叶斯网中三个变量间的典型依赖关系**
 
-![image-20201125152210332](..\贝叶斯网三种依赖关系.png)
+![image-20201125152210332](..\Resources\贝叶斯网三种依赖关系.png)
 
 - 同父结构：给定父结点取值，子结点条件独立，$x_3\bot x_4|x_1$
 - V型结构：给定子结点取值，父结点必不独立；若子结点取值完全未知，则父结点独立（边际独立性）
@@ -924,7 +924,7 @@ plt.show()
 
 得到**道德图**。如果去除集合 $\vec{z}$，x和y分属两个连通分支，则 x 和 y 被 $\vec{z}$ 有向分离，$x\bot y|\vec{z}$
 
-![image-20201125154144717](..\道德图.png)
+![image-20201125154144717](..\Resources\道德图.png)
 
 
 
