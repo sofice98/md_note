@@ -691,6 +691,28 @@ public interface SzyUserService {
 }
 ```
 
+创建对应的【控制层接口】 SzyUserController，并注入服务层接口
+
+```java
+/src/main/java/com.szy.controller/SzyUserController.java
+@Controller
+@RequestMapping("/user")
+public class SzyUserController {
+    @Resource
+    private SzyUserService szyUserService;
+
+    @GetMapping("/findAll")
+    public String findAll(Model model){
+        List<SzyUser> ayUserList = szyUserService.findAll();
+        for(SzyUser szyUser : ayUserList){
+            System.out.println("id: " + szyUser.getId());
+            System.out.println("name: " + szyUser.getName());
+        }
+        return "hello";
+	}
+}
+```
+
 
 
 
