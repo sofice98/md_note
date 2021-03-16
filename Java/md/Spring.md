@@ -350,7 +350,7 @@ web.xml
 
 注册，加载bean
 
-【<context:component-scan base-package="com.szy"/>】：扫描 base-package 包下的所有java类，注册成Bean
+【<context:component-scan base-package="com.ay"/>】：扫描 base-package 包下的所有java类，注册成Bean
 
 ```xml
 /src/main/resources/applicationContext.xml
@@ -365,7 +365,7 @@ web.xml
            http://www.springframework.org/schema/context
            http://www.springframework.org/schema/context/spring-context-2.5.xsd">
 
-    <context:component-scan base-package="com.szy"/>
+    <context:component-scan base-package="com.ay"/>
 </beans>
 ```
 
@@ -388,7 +388,7 @@ public class SpringTest {
         springTest.sayHello();
     }
     public void sayHello() {
-        System.out.println("hello szy");
+        System.out.println("hello ay");
     }
 
 }
@@ -497,7 +497,7 @@ spring-mvc.xml
         http://www.springframework.org/schema/aop/spring-aop.xsd">
 
     <!-- 扫描controller(后端控制器),并且扫描其中的注解-->
-    <context:component-scan base-package="com.szy.controller"/>
+    <context:component-scan base-package="com.ay.controller"/>
     <!--设置配置方案 -->
     <mvc:annotation-driven/>
     <!--配置JSP　显示ViewResolver(视图解析器)-->
@@ -509,11 +509,11 @@ spring-mvc.xml
 </beans>
 ```
 
-将@Controller实例化一个单例对象 SzyTestController
+将@Controller实例化一个单例对象 AyTestController
 
 ```java
-szyTestController.java
-package com.szy.controller;
+ayTestController.java
+package com.ay.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -522,7 +522,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping(value = "/test")
-public class SzyTestController {
+public class AyTestController {
     @GetMapping("/sayHello")
     public String sayHello() {
         return "hello";
@@ -585,7 +585,7 @@ public class SzyTestController {
 
 ```properties
 jdbc.driverClassName=com.mysql.jdbc.Driver
-jdbc.url=jdbc:mysql://127.0.0.1:3306/springmvc-mybatis-book?serverTimezone=GMT
+jdbc.url=jdbc:mysql://127.0.0.1:3306/db_name?serverTimezone=GMT
 jdbc.username=root
 jdbc.password=martin123
 ```
@@ -619,22 +619,6 @@ jdbc.password=martin123
     <property name="dataSource" ref="dataSource"/>
     <!--扫描sql配置文件:mapper需要的xml文件-->
     <property name="mapperLocations" value="classpath:mapper/*.xml"/>
-    <!-- mybatis配置文件的位置 -->
-    <property name="configLocation" value="classpath:mybatis-config.xml"></property>
-    <!-- 配置分页插件 -->
-    <property name="plugins">
-        <array>
-            <bean class="com.github.pagehelper.PageInterceptor">
-                <property name="properties">
-                    <value>
-                        helperDialect=mysql
-                        reasonable=true
-                    </value>
-                </property>
-            </bean>
-        </array>
-    </property>
-
 </bean>
 
 <bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate">
@@ -645,15 +629,14 @@ jdbc.password=martin123
 <bean id="mapperScannerConfigurer" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
     <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
     <property name="basePackage" value="com.ay.dao"/>
-
 </bean>
 ```
 
 创建数据库表对应的【实体类对象 】
 
 ```java
-/src/main/java/com.szy.model/SzyUser.java
-public class SzyUser implements Serializable {
+/src/main/java/com.ay.model/ayUser.java
+public class AyUser implements Serializable {
     private Integer id;
     private String name;
     private String password;
@@ -661,57 +644,176 @@ public class SzyUser implements Serializable {
 }
 ```
 
-创建对应的DAO【对象接口】 SzyUserDao
+创建对应的DAO【对象接口】 AyUserDao
 
 ```java
-/src/main/java/com.szy.dao/SzyUserDao.java
-package com.szy.dao;
+/src/main/java/com.ay.dao/AyUserDao.java
+package com.ay.dao;
 
-import com.szy.model.SzyUser;
+import com.ay.model.AyUser;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface SzyUserDao {
-    List<SzyUser> findAll();
+public interface AyUserDao {
+    List<AyUser> findAll();
 }
 ```
 
-创建对应的【服务层接口】 SzyUserService
+创建对应的【服务层接口】 AyUserService
 
 ```java
-/src/main/java/com.szy.services/SzyUserService.java
-package com.szy.service;
+/src/main/java/com.ay.services/AyUserService.java
+package com.ay.service;
 
-import com.szy.model.SzyUser;
+import com.ay.model.AyUser;
 import java.util.List;
 
-public interface SzyUserService {
-    List<SzyUser> findAll();
+public interface AyUserService {
+    List<AyUser> findAll();
 }
 ```
 
-创建对应的【控制层接口】 SzyUserController，并注入服务层接口
+创建对应的【控制层接口】 AyUserController，并注入服务层接口
 
 ```java
-/src/main/java/com.szy.controller/SzyUserController.java
+/src/main/java/com.ay.controller/AyUserController.java
 @Controller
 @RequestMapping("/user")
-public class SzyUserController {
+public class AyUserController {
     @Resource
-    private SzyUserService szyUserService;
+    private AyUserService ayUserService;
 
     @GetMapping("/findAll")
     public String findAll(Model model){
-        List<SzyUser> ayUserList = szyUserService.findAll();
-        for(SzyUser szyUser : ayUserList){
-            System.out.println("id: " + szyUser.getId());
-            System.out.println("name: " + szyUser.getName());
+        List<AyUser> ayUserList = ayUserService.findAll();
+        for(AyUser ayUser : ayUserList){
+            System.out.println("id: " + ayUser.getId());
+            System.out.println("name: " + ayUser.getName());
         }
         return "hello";
 	}
 }
 ```
+
+创建【服务实体】
+
+```java
+@Service
+public class AyUserServiceImpl implements AyUserService {
+
+    @Resource
+    private AyUserDao ayUserDao;
+
+    public List<AyUser> findAll() {
+        return ayUserDao.findAll();
+    }
+}
+```
+
+创建 mapper 需要的xml文件
+
+【\<mapper\>】：绑定 Dao 接口
+
+【\<select\>】：用于编写 select 查询语句，id 属性值与 Dao 接口中的方法名一一对应
+
+```xml
+/src/main/resources/mapper/AyUserMapper.xml
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ay.dao.AyUserDao">
+
+    <sql id="userField">
+        a.id as "id",
+        a.name as "name",
+        a.password as "password"
+    </sql>
+
+    <!-- 获取所有用户 -->
+    <select id="findAll" resultType="com.ay.model.AyUser">
+    select
+    <include refid="userField"/>
+    from ay_user as a
+    </select>
+</mapper>
+```
+
+
+
+
+
+# Log4j
+
+**Logger（记录器）**：有七个级别，只输出级别不低于设定级别的日志信息
+
+**Appender（输出端）**：把日志输出到不同的地方
+
+**Layout（布局）**：格式化 Log 信息的输出
+
+
+
+添加依赖包
+
+【slf4j-api】：为 java 提供简单日志接口
+
+【slf4j-log4j12】：连接 slf4j-api 和  log4j 的适配器
+
+【log4j】：具体化的日志系统，通过 slf4j-log4j12 初始化 log4j，达到最终日志的输出
+
+```xml
+<slf4j.version>1.7.25</slf4j.version>
+<log4j.version>1.2.17</log4j.version>
+<!-- log4j2 start -->
+<dependency>
+    <groupId>log4j</groupId>
+    <artifactId>log4j</artifactId>
+    <version>${log4j.version}</version>
+</dependency>
+<dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-api</artifactId>
+    <version>${slf4j.version}</version>
+</dependency>
+<dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-log4j12</artifactId>
+    <version>${slf4j.version}</version>
+</dependency>
+<!-- log4j2 end -->
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
